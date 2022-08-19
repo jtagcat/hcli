@@ -8,11 +8,11 @@ import (
 
 type (
 	Definitions struct {
-		// string: identifier slug
-		Short map[string]*Kind
-		Long  map[string]*Kind
+		D       DefinitionMap      // string: identifier slug
+		Aliases map[string]*string // [0]: alias slug, [1]: D
 	}
-	Kind int // enum
+	DefinitionMap map[string]*Kind
+	Kind          int // enum
 )
 
 const ( // enum
@@ -37,13 +37,13 @@ func (defs *Definitions) Parse(
 	args []string, // usually os.Args
 	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke (chokes after "--" aren't seen)
 ) (
-	_ OptValues, // parsed options
+	_ OptionsMap, // parsed options
 	parsed []string, // non-options, arguments
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // on undefined option (left of first choke)
 ) {
 	chokeM := internal.SliceToLowercaseMap(chokes)
-	opts := defs.toEmptyOpts()
+	optsM := defs.D.toEmptyOptsM()
 
 	var nextWasConsumed bool
 	for i, a := range args {
@@ -56,7 +56,7 @@ func (defs *Definitions) Parse(
 		}
 
 		if _, ok := chokeM[a]; ok {
-			return opts, parsed, args[i:], nil
+			return optsM, parsed, args[i:], nil
 		}
 
 		if a == "-" || !strings.HasPrefix(a, "-") {
@@ -68,9 +68,9 @@ func (defs *Definitions) Parse(
 		// !HasPrefix "--"
 		if !strings.HasPrefix(a[1:], "-") {
 			// short option
-			nextWasConsumed, err = opts.parseShortOption(&i, &args)
+			nextWasConsumed, err = defs.parseShortOption(&optsM, &i, &args)
 			if err != nil {
-				return OptValues{}, nil, nil, err
+				return nil, nil, nil, err
 			}
 			continue
 		}
@@ -81,46 +81,46 @@ func (defs *Definitions) Parse(
 				// there are more args
 				parsed = append(parsed, args[i+1:]...)
 			}
-			return opts, parsed, nil, nil
+			return optsM, parsed, nil, nil
 		}
 
 		// long option
-		nextWasConsumed, err = opts.parseLongOption(&i, &args) // len(a) >= 3
+		nextWasConsumed, err = defs.parseLongOption(&optsM, i, args) // len(a) >= 3
 		if err != nil {
-			return OptValues{}, nil, nil, err
+			return nil, nil, nil, err
 		}
 		continue
 
 	}
-	return opts, parsed, nil, nil
+	return optsM, parsed, nil, nil
 }
 
-func (defs *Definitions) toEmptyOpts() OptValues {
-	// v := make(map)
-
-	// definitionsGroupToOpts(true, defs.Short, )
-	// definitionsGroupToOpts(false, defs.Long)
-
-	return OptValues{} // TODO:
+func (defs *DefinitionMap) toEmptyOptsM() OptionsMap {
+	return OptionsMap{} // TODO:
 }
 
-func definitionsGroupToOpts(isShort bool, group map[string]*Kind) {
-}
-
-type OptValues struct {
-	// TODO: ???
-}
+type (
+	OptionsMap map[string]Option
+	Option     struct {
+		// TODO: ???
+	}
+)
 
 // long option (--foo) (--foo=value) ?(--foo value)
 // (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
 //
 // caller must ensure len(args[i]) >= 3
-func (opts *OptValues) parseLongOption(i *int, args *[]string) (nextWasConsumed bool, _ error) {
+func (defs *Definitions) parseLongOption(optsM *OptionsMap, i int, args []string) (nextWasConsumed bool, _ error) {
+	key, value, valueFound := strings.Cut(args[i][2:], // [2:]: skip "--"
+		"=")
+
+	// if valueNeeded && !valueFound
+
 	return false, nil // TODO:
 }
 
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value)
-func (opts *OptValues) parseShortOption(i *int, args *[]string) (nextWasConsumed bool, _ error) {
+func (opts *Definitions) parseShortOption(optsM *OptionsMap, i *int, args *[]string) (nextWasConsumed bool, _ error) {
 	return false, nil // TODO:
 	// ?implement negative boolean? _f
 }
