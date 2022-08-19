@@ -57,7 +57,8 @@ func (defs *Definitions) Parse(
 	//          ^ parsed ^    ^choke, chokeReturn: "chokename", "--foo", "differentDef"
 
 	args []string, // usually os.Args
-	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke (chokes after "--NotAlsoBoolean chokename" are not seen)
+	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke
+	// Chokes are not seen after "--", or in places of argument values ("--foo choke", "-f choke")
 ) (
 	_ OptionsMap, // parsed options
 	parsed []string, // non-options, arguments
@@ -85,21 +86,10 @@ func (defs *Definitions) Parse(
 			parsed = append(parsed, a)
 
 		case e_argumentDivider:
-			if len(args)-1 == i { // no more args
-				return optM, parsed, nil, nil
+			if len(args)-1 != i { // there are more args
+				parsed = append(parsed, args[i+1:]...)
 			}
-			remainingArgs := args[i+1:]
-
-			// look for chokes
-			for lookI, lookA := range remainingArgs {
-				if _, isChoke := chokeM[strings.ToLower(lookA)]; isChoke {
-
-					parsed = append(parsed, remainingArgs[:lookI]...)
-					return optM, parsed, remainingArgs[lookI:], nil
-				}
-			}
-
-			return optM, append(parsed, remainingArgs...), nil, nil
+			return optM, parsed, nil, nil
 
 		case e_shortOption:
 			skipNext, err = defs.parseShortOption(&optM, &i, &args)
@@ -196,7 +186,7 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 	if !valueFound && len(*args)-1 > *i {
 		lookArg := (*args)[*i+1]
 
-		valueFound := def.lookaheadUsable(chokeM, lookArg)
+		valueFound := def.lookaheadUsable(lookArg)
 		if valueFound {
 			nextWasConsumed, value = true, lookArg
 		}
@@ -294,12 +284,8 @@ func (defs *Definitions) find(key string) (Definition, error) {
 	return Definition{}, fmt.Errorf(errPrelude+"option %s: %w", key, ErrOptionHasNoDefinition)
 }
 
-func (def *Definition) lookaheadUsable(chokeM *map[string]bool, arg string) bool {
+func (def *Definition) lookaheadUsable(arg string) bool {
 	if def.AlsoBoolean || def.Type == e_Boolean {
-		return false
-	}
-
-	if _, isChoke := (*chokeM)[strings.ToLower(arg)]; isChoke {
 		return false
 	}
 
