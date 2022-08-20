@@ -1,4 +1,8 @@
-## Full Spec:
+## Full Spec
+```
+(os.Args) arguments = shortOptions + longOptions + parsedArgs + chokeReturn
+```
+
 - `--` ends all arguments.
 - `-` is a plain argument.
 - Where multiple arguments conflict, the following happens:
@@ -31,7 +35,7 @@
 Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html, the following has been added:
 
 - def.Slice: (`--foo bar --foo baz` foo:{`bar`,`baz`})
-- Space seperator in long options.
+- Space seperator (lookahead) in long options.
     - AlsoBoolean: Disallows space seperator, allows mixed boolean (`--foo`) and valueful (`--foo=value`) definitions.
 - Negative short options: adding `-` before a short option means `false`.
 - Chokes enables parsing until a keyword is found. This allows crafting global-local-superglobal-whatever options.

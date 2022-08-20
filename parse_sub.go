@@ -23,7 +23,7 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 		return false, err
 	}
 
-	// no-arg boolean
+	// boolean, no space (lookahead)
 	if !valueFound && (def.Type == e_Boolean || def.AlsoBoolean) {
 		valueFound, value = true, "true"
 	}
@@ -32,7 +32,7 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 	if !valueFound && len(*args)-1 > *i {
 		lookArg := (*args)[*i+1]
 
-		valueFound := def.lookaheadUsable(lookArg)
+		valueFound := argumentKind(&lookArg) == e_argument
 		if valueFound {
 			nextWasConsumed, value = true, lookArg
 		}
@@ -41,69 +41,69 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 	return nextWasConsumed, optM.parseOptionContent(&def, &value, &valueFound)
 }
 
-// short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value)
+// short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
 //
 // caller should ensure len(args[i]) >= 2; and defs.checkDefs()
-func (defs *Definitions) parseShortOption(optM *OptionsMap, i *int, args *[]string) (nextWasConsumed bool, _ error) {
-	argName := (*args)[*i][1:] // [1:]: skip "-"
-	if argName == "" {
-		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) >= 2 for %d in %q: %w", i, args, ErrInternalBug)
+func (defs *Definitions) parseShortOption(optM *OptionsMap, argI *int, args *[]string) (nextWasConsumed bool, _ error) {
+	argRune := []rune((*args)[*argI][1:]) // [1:]: skip 0th "-"
+	if len(argRune) == 0 {
+		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) >= 2 for %d in %q: %w", argI, args, ErrInternalBug)
 	}
 
-	// 	var value string
-	// 	var valueFound, negateNext bool
-	//
-	// 	for _, runeV := range argName {
-	// 		char := string(runeV)
-	//
-	// 		if char == "_" {
-	// 			// new with harg: short option prefix "_" negates it
-	// 			negateNext = true
-	// 			continue
-	// 		}
-	//
-	// 		def, err := defs.find(char)
-	// 		if err != nil {
-	// 			return false, err
-	// 		}
-	//
-	// 		// if !valueFound && len(*args)-1 > *i {
-	// 		// 	lookArg := (*args)[*i+1]
-	//
-	// 		// 	valueFound := def.lookaheadUsable(chokeM, lookArg)
-	// 		// 	if valueFound {
-	// 		// 		nextWasConsumed, value = true, lookArg
-	// 		// 	}
-	// 		// }
-	//
-	// 		if def.Type == e_Boolean {
-	// 			valueFound = true
-	// 			if negateNext {
-	// 				value = "false"
-	// 			} else {
-	// 				value = "true"
-	// 			}
-	// 		} else {
-	// 			//
-	// 			//
-	// 		}
-	//
-	// 		if def.Type != e_Boolean && def.AlsoBoolean {
-	// 			return false, fmt.Errorf("short definition %s: %w", char, ErrShortOptionNoAlsoBoolean)
-	// 		}
-	//
-	// 		// if not bool
-	//
-	// 		optM.parseOptionContent(&def, b)
-	// 		if negateNext {
-	// 			b, negateNext = true, false
-	// 		}
-	//
-	// 		// is it bool or not
-	// 	}
+	var negateNext bool
+	for optI, opt := range argRune {
 
-	return false, nil // TODO:
-	// ?implement negative boolean? _f
+		valueFound, value := false, ""
+		optS := string(opt)
+
+		if optS == "-" {
+			// new with harg: short option prefix "-" negates booleans
+			negateNext = true
+			continue
+		}
+
+		def, err := defs.find(optS)
+		if err != nil {
+			return false, err
+		}
+
+		if def.Type == e_Boolean || def.AlsoBoolean {
+			valueFound = true
+			if negateNext {
+				value = "false"
+				negateNext = false
+			} else {
+				value = "true"
+			}
+
+			err = optM.parseOptionContent(&def, &value, &valueFound)
+			if err != nil {
+				return false, err
+			}
+
+			continue
+		}
+
+		// valueful opt, break loop
+
+		if len(argRune)-1 == optI {
+			// value in same arg
+			valueFound, value = true, string(argRune[optI+1:])
+		} else {
+			// no value, space reached, try to lookahead (args: "-o", "value")
+			if len(*args)-1 > *argI { // there are more args
+				lookArg := (*args)[*argI+1]
+
+				valueFound := argumentKind(&lookArg) == e_argument
+				if valueFound {
+					nextWasConsumed, value = true, lookArg
+				}
+			}
+		}
+		return true, optM.parseOptionContent(&def, &value, &valueFound)
+
+	}
+	return false, nil
 }
 
 func (defs *Definitions) find(key string) (Definition, error) {
@@ -128,12 +128,4 @@ func (defs *Definitions) find(key string) (Definition, error) {
 	}
 
 	return Definition{}, fmt.Errorf(errPrelude+"option %s: %w", key, ErrOptionHasNoDefinition)
-}
-
-func (def *Definition) lookaheadUsable(arg string) bool {
-	if def.Type == e_Boolean || def.AlsoBoolean {
-		return false
-	}
-
-	return argumentKind(&arg) == e_argument
 }

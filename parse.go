@@ -43,10 +43,9 @@ var (
 	ErrMixedSliceAlsoBoolean = errors.New("slice option with AlsoBoolean can't be given both boolean and slice inputs") // --foo=value --foo --foo=value
 
 	// runtime error
-	ErrShortOptionNoAlsoBoolean = errors.New("short option (-x) valueful definition mustn't be AlsoBoolean")
-	ErrInternalBug              = errors.New("internal bug in harg") // anti-panic safetynet
+	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet
 
-	// depends on definitions (every exectime):
+	// depends on definitions (Parse() always fails):
 	ErrSlugConflict = errors.New("conflicting same-named alias")
 )
 
