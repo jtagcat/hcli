@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	internal "github.com/jtagcat/harg/internal"
 )
@@ -39,7 +40,6 @@ const ( // enum
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrLongOptionIsTooShort  = errors.New("long option (--foo) key name must have at least 2 characters")               // restriction for sanity
 	ErrMixedSliceAlsoBoolean = errors.New("slice option with AlsoBoolean can't be given both boolean and slice inputs") // --foo=value --foo --foo=value
 
 	// runtime error
@@ -64,6 +64,9 @@ func (defs *Definitions) Parse(
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
 ) {
+	if err := defs.checkDefs(); err != nil {
+		return nil, nil, nil, err
+	}
 	chokeM := internal.SliceToLowercaseMap(chokes)
 	optM := defs.D.toEmptyOptM()
 
@@ -133,15 +136,18 @@ func argumentKind(arg *string) argumentKindT {
 		return e_argument // including "", "-"
 	}
 
-	// !HasPrefix "--"; len(2) checked above
-	if !strings.HasPrefix((*arg)[1:], "-") {
+	// "-x"
+	if strings.HasPrefix((*arg)[1:], "-") {
 		return e_shortOption
 	}
 
-	if len(*arg) == 2 {
+	// begins with "--"
+	switch utf8.RuneCountInString(*arg) {
+	case 2: // "--"
 		return e_argumentDivider
+	case 3: // "--x", single negative short
+		return e_shortOption
+	default: // > 3
+		return e_longOption
 	}
-
-	// len() >= 3
-	return e_longOption
 }

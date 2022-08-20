@@ -9,23 +9,21 @@ import (
 // long option (--foo) (--foo=value) ?(--foo value)
 // (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
 //
-// caller should ensure len(args[i]) >= 3; and defs.checkDefs()
+// caller should ensure len(args[i]) > 3; and defs.checkDefs()
 func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bool, i *int, args *[]string) (nextWasConsumed bool, _ error) {
 	argName := (*args)[*i][2:] // [2:]: skip "--"
 	if argName == "" {
-		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) >= 3 for %d in %q: %w", i, args, ErrInternalBug)
+		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) > 3 for %d in %q: %w", i, args, ErrInternalBug)
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
-	if utf8.RuneCountInString(key) < 2 {
-		return false, ErrLongOptionIsTooShort
-	}
 
 	def, err := defs.find(key)
 	if err != nil {
 		return false, err
 	}
 
+	// no-arg boolean
 	if !valueFound && (def.Type == e_Boolean || def.AlsoBoolean) {
 		valueFound, value = true, "true"
 	}
@@ -133,7 +131,7 @@ func (defs *Definitions) find(key string) (Definition, error) {
 }
 
 func (def *Definition) lookaheadUsable(arg string) bool {
-	if def.AlsoBoolean || def.Type == e_Boolean {
+	if def.Type == e_Boolean || def.AlsoBoolean {
 		return false
 	}
 
