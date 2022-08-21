@@ -108,6 +108,10 @@ type (
 	}
 )
 
+func (o *optBool) typeName() string {
+	return "bool"
+}
+
 func (o *optBool) contents() any {
 	return o.value
 }
@@ -135,6 +139,10 @@ type optString struct {
 	value []string
 }
 
+func (o *optString) typeName() string {
+	return "string"
+}
+
 func (o *optString) contents() any {
 	return o.value
 }
@@ -149,6 +157,10 @@ func (o *optString) add(s string) error {
 type optInt struct {
 	optCommon
 	value []int
+}
+
+func (o *optInt) typeName() string {
+	return "int"
 }
 
 func (o *optInt) contents() any {
@@ -172,6 +184,10 @@ type optInt64 struct {
 	value []int64
 }
 
+func (o *optInt64) typeName() string {
+	return "int64"
+}
+
 func (o *optInt64) contents() any {
 	return o.value
 }
@@ -191,6 +207,10 @@ func (o *optInt64) add(s string) error {
 type optUint struct {
 	optCommon
 	value []uint
+}
+
+func (o *optUint) typeName() string {
+	return "uint"
 }
 
 func (o *optUint) contents() any {
@@ -214,6 +234,10 @@ type optUint64 struct {
 	value []uint64
 }
 
+func (o *optUint64) typeName() string {
+	return "uint64"
+}
+
 func (o *optUint64) contents() any {
 	return o.value
 }
@@ -235,6 +259,10 @@ type optFloat64 struct {
 	value []float64
 }
 
+func (o *optFloat64) typeName() string {
+	return "float64"
+}
+
 func (o *optFloat64) contents() any {
 	return o.value
 }
@@ -254,6 +282,10 @@ func (o *optFloat64) add(s string) error {
 type optDuration struct {
 	optCommon
 	value []time.Duration
+}
+
+func (o *optDuration) typeName() string {
+	return "duration"
 }
 
 func (o *optDuration) contents() any {
