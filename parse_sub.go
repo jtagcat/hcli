@@ -99,7 +99,7 @@ func (defs *Definitions) parseShortOption(optM *OptionsMap, argI *int, args *[]s
 				}
 			}
 		}
-		return true, optM.parseOptionContent(key, efKey, &def, key)
+		return true, optM.parseOptionContent(key, efKey, &def, value)
 
 	}
 	return false, nil
