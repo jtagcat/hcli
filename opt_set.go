@@ -1,6 +1,7 @@
 package harg
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -10,43 +11,47 @@ func (optM *OptionsMap) parseOptionContent(
 	effectiveKey string, def *Definition,
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
+	opt, nativeOK := (*optM)[effectiveKey]
 
-	// if def.Type == e_bool || def.AlsoBool {
-	// 	// TODO: use loops, bool.add()
-	// 	// boolVal, err := strconv.ParseBool(value) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
-	// 	// if err == nil {
-	// 	// 	typeM := (*optM)[e_bool]
+	if def.AlsoBool {
+		boolOpt := typeEmptyM[e_bool]
+		err := boolOpt.add(value)
+		if err == nil && nativeOK { // we already have a native opt
+			return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, boolOpt.typeName(), ErrMixedValueInAlsoBool)
+		}
 
-	// 	// 	// TODO:
+		// TODO: use loops, bool.add()
+		// boolVal, err := strconv.ParseBool(value) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
+		// if err == nil {
 
-	// 	// 	if def.Type == e_bool {
-	// 	// 	}
+		// 	// TODO:
 
-	// 	// 	return nil
-	// 	// }
+		// 	if def.Type == e_bool {
+		// 	}
 
-	// 	// // err != nil
-	// 	// if def.Type == e_bool {
-	// 	// 	return fmt.Errorf("parsing option %s with definition %s as type bool: %w", originalKey, effectiveKey, err)
-	// 	// }
+		// 	return nil
+		// }
 
-	// 	// // AlsoBool continues to switch
-	// }
+		// // err != nil
+		// if def.Type == e_bool {
+		// 	return fmt.Errorf("parsing option %s with definition %s as type bool: %w", originalKey, effectiveKey, err)
+		// }
 
-	// // valueful
-	// typeM := (*optM)[def.Type]
-	// opt, ok := typeM[effectiveKey]
-	// if !ok {
-	// 	opt = typeEmptyM[def.Type]
-	// }
+		// // AlsoBool continues to switch
+	}
 
-	// err := opt.add(value)
-	// if err != nil {
-	// 	return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
-	// }
+	// valueful
+	if !nativeOK {
+		opt = typeEmptyM[def.Type]
+	}
 
-	// typeM[effectiveKey] = opt
-	// return nil
+	err := opt.add(value)
+	if err != nil {
+		return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
+	}
+
+	typeM[effectiveKey] = opt
+	return nil
 }
 
 type (

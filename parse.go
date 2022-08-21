@@ -22,15 +22,16 @@ type (
 		// For long options:
 		//   false: allows spaces (`--slug value` in addition to `--slug=value`)
 		//   true: if "=" is not used, Type is changed to bool (or countable)
-		AlsoBool bool
+		AlsoBool bool // ErrMixedValueInAlsoBool if --type
+		// TODO: sudden stop human.log, implement bool for if
 	}
 )
 
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrMixedSliceAlsoBool    = errors.New("slice option with AlsoBool can't be given both bool and slice inputs") // --foo=value --foo --foo=value
-	ErrIncompatibleValue     = errors.New("")                                                                     // TODO: strconv.Atoi("this is not a number")
+	ErrMixedValueInAlsoBool  = errors.New("AlsoBool can't be given both bool and value inputs") // --foo=value --foo --foo=value
+	ErrIncompatibleValue     = errors.New("")                                                   // TODO: strconv.Atoi("this is not a number")
 
 	// runtime error
 	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet
