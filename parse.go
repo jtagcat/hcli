@@ -16,8 +16,7 @@ type (
 	}
 	DefinitionMap map[string]Definition // map[slug]; 1-character: short option, >1: long option
 	Definition    struct {
-		Type      Type
-		Countable bool // where seen as bool, see as countable (-vvv) instead.
+		Type Type
 
 		// For short options (1-char length), true means it's always bool
 		// For long options:
@@ -49,7 +48,7 @@ func (defs *Definitions) Parse(
 	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke
 	// Chokes are not seen after "--", or in places of argument values ("--foo choke", "-f choke")
 ) (
-	_ OptionsTypedMap, // parsed options
+	_ OptionsMap, // parsed options
 	parsed []string, // non-options, arguments
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
@@ -58,7 +57,7 @@ func (defs *Definitions) Parse(
 		return nil, nil, nil, err
 	}
 	chokeM := internal.SliceToLowercaseMap(chokes)
-	optM := defs.D.emptyOptM()
+	optM := make(OptionsMap)
 
 	var skipNext bool
 	for i, a := range args {

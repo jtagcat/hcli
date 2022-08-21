@@ -1,73 +1,61 @@
 package harg
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 )
 
-func (defM DefinitionMap) emptyOptM() OptionsTypedMap {
-	typeM := make(OptionsTypedMap)
-	for _, d := range defM {
-		if _, ok := typeM[d.Type]; !ok {
-			typeM[d.Type] = make(optionsMap)
-		}
-	}
-	typeM[e_bool] = make(optionsMap) // bool always exists for chance of AlsoBool
-	return typeM
-}
-
-func (optM *OptionsTypedMap) parseOptionContent(
+func (optM *OptionsMap) parseOptionContent(
 	originalKey string, // may be alias name or == effectiveKey
 	effectiveKey string, def *Definition,
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
 
-	if def.Type == e_bool || def.AlsoBool {
-		// TODO: use loops, bool.add()
-		// boolVal, err := strconv.ParseBool(value) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
-		// if err == nil {
-		// 	typeM := (*optM)[e_bool]
+	// if def.Type == e_bool || def.AlsoBool {
+	// 	// TODO: use loops, bool.add()
+	// 	// boolVal, err := strconv.ParseBool(value) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
+	// 	// if err == nil {
+	// 	// 	typeM := (*optM)[e_bool]
 
-		// 	// TODO:
+	// 	// 	// TODO:
 
-		// 	if def.Type == e_bool {
-		// 	}
+	// 	// 	if def.Type == e_bool {
+	// 	// 	}
 
-		// 	return nil
-		// }
+	// 	// 	return nil
+	// 	// }
 
-		// // err != nil
-		// if def.Type == e_bool {
-		// 	return fmt.Errorf("parsing option %s with definition %s as type bool: %w", originalKey, effectiveKey, err)
-		// }
+	// 	// // err != nil
+	// 	// if def.Type == e_bool {
+	// 	// 	return fmt.Errorf("parsing option %s with definition %s as type bool: %w", originalKey, effectiveKey, err)
+	// 	// }
 
-		// // AlsoBool continues to switch
-	}
+	// 	// // AlsoBool continues to switch
+	// }
 
-	// valueful
-	typeM := (*optM)[def.Type]
-	opt, ok := typeM[effectiveKey]
-	if !ok {
-		opt = typeEmptyM[def.Type]
-	}
+	// // valueful
+	// typeM := (*optM)[def.Type]
+	// opt, ok := typeM[effectiveKey]
+	// if !ok {
+	// 	opt = typeEmptyM[def.Type]
+	// }
 
-	err := opt.add(value)
-	if err != nil {
-		return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
-	}
+	// err := opt.add(value)
+	// if err != nil {
+	// 	return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
+	// }
 
-	typeM[effectiveKey] = opt
-	return nil
+	// typeM[effectiveKey] = opt
+	// return nil
 }
 
 type (
-	OptionsTypedMap map[Type]optionsMap
-	optionsMap      map[string]option // parallel to Definitions.D
-	option          interface {
+	OptionsMap map[string]option // parallel to Definitions.D
+	option     interface {
+		typeName() string
 		found(write bool) bool
-		contents() any                     // resolved with option.Sl
-		add(rawOpt string) (string, error) // string: type name (to use in error)
+		contents() any           // resolved with option.Sl
+		add(rawOpt string) error // string: type name (to use in error)
 	}
 )
 
@@ -124,10 +112,10 @@ func (o *optBool) contents() any {
 	return o.value
 }
 
-func (o *optBool) add(s string) (string, error) {
+func (o *optBool) add(s string) error {
 	v, err := strconv.ParseBool(s) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
 	if err != nil {
-		return "bool", err
+		return err
 	}
 
 	if v == true {
@@ -137,7 +125,7 @@ func (o *optBool) add(s string) (string, error) {
 	}
 
 	o.value.value = append(o.value.value, v)
-	return "bool", nil
+	return nil
 }
 
 // string
@@ -151,9 +139,9 @@ func (o *optString) contents() any {
 	return o.value
 }
 
-func (o *optString) add(s string) (string, error) {
+func (o *optString) add(s string) error {
 	o.value = append(o.value, s)
-	return "string", nil
+	return nil
 }
 
 // int
@@ -167,14 +155,14 @@ func (o *optInt) contents() any {
 	return o.value
 }
 
-func (o *optInt) add(s string) (string, error) {
+func (o *optInt) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {
-		return "int", err
+		return err
 	}
 
 	o.value = append(o.value, int(v))
-	return "", nil
+	return err
 }
 
 // int64
@@ -188,14 +176,14 @@ func (o *optInt64) contents() any {
 	return o.value
 }
 
-func (o *optInt64) add(s string) (string, error) {
+func (o *optInt64) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, 64)
 	if err != nil {
-		return "int64", err
+		return err
 	}
 
 	o.value = append(o.value, int64(v))
-	return "", nil
+	return err
 }
 
 // uint
@@ -209,14 +197,14 @@ func (o *optUint) contents() any {
 	return o.value
 }
 
-func (o *optUint) add(s string) (string, error) {
+func (o *optUint) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, strconv.IntSize)
 	if err != nil {
-		return "uint", err
+		return err
 	}
 
 	o.value = append(o.value, uint(v))
-	return "", nil
+	return err
 }
 
 // uint64
@@ -230,14 +218,14 @@ func (o *optUint64) contents() any {
 	return o.value
 }
 
-func (o *optUint64) add(s string) (string, error) {
+func (o *optUint64) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, 64)
 	if err != nil {
-		return "uint64", err
+		return err
 	}
 
 	o.value = append(o.value, uint64(v))
-	return "", nil
+	return err
 }
 
 // float64
@@ -251,14 +239,14 @@ func (o *optFloat64) contents() any {
 	return o.value
 }
 
-func (o *optFloat64) add(s string) (string, error) {
+func (o *optFloat64) add(s string) error {
 	v, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return "float64", err
+		return err
 	}
 
 	o.value = append(o.value, float64(v))
-	return "", nil
+	return err
 }
 
 // duration
@@ -272,14 +260,14 @@ func (o *optDuration) contents() any {
 	return o.value
 }
 
-func (o *optDuration) add(s string) (string, error) {
+func (o *optDuration) add(s string) error {
 	v, err := time.ParseDuration(s)
 	if err != nil {
-		return "duration", err
+		return err
 	}
 
 	o.value = append(o.value, time.Duration(v))
-	return "", nil
+	return err
 }
 
 // timestamp
