@@ -18,7 +18,6 @@ type (
 	Definition    struct {
 		Type      Type
 		Countable bool // where seen as bool, see as countable (-vvv) instead.
-		Slice     bool // where seen as value, append to slice instead of ignoring all but last
 
 		// For short options (1-char length), true means it's always bool
 		// For long options:
@@ -26,16 +25,6 @@ type (
 		//   true: if "=" is not used, Type is changed to bool (or countable)
 		AlsoBool bool
 	}
-	Type int // enum
-)
-
-const ( // enum
-	e_bool Type = iota
-	// doesn't seem the best way, but let's try
-	e_string
-	e_int
-	e_int64
-	// TODO: ...?
 )
 
 var (
@@ -69,7 +58,7 @@ func (defs *Definitions) Parse(
 		return nil, nil, nil, err
 	}
 	chokeM := internal.SliceToLowercaseMap(chokes)
-	optM := defs.D.toEmptyOptM()
+	optM := defs.D.emptyOptM()
 
 	var skipNext bool
 	for i, a := range args {

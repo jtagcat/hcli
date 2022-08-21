@@ -16,7 +16,7 @@
     - A space may be used to specify values for non-bool types. (`--foo bar`)
     - AlsoBool treats a valueless valueful option as a bool. (`--foo`; `--foo=value`)
         - Space-seperated syntax is unavailable. (invalid:`--foo value`)
-        - Bools in values are not parsed. (`--foo=true` is string value `"true"`)
+        - Bools in values are parsed as booleans. (`--foo=true` is bool, not string "true")
 - Prefix `-` means short options follow.
     - Short options are 1 utf8 character, case sensitive.
     - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`)

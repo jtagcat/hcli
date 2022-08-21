@@ -10,7 +10,7 @@ import (
 // (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
-func (defs *Definitions) parseLongOption(optM *OptionsTypedMap, chokeM *map[string]bool, i *int, args *[]string) (nextWasConsumed bool, _ error) {
+func (defs *Definitions) parseLongOption(optM *OptionsTypedMap, chokeM *map[string]bool, i *int, args *[]string) (consumedNext bool, _ error) {
 	argName := (*args)[*i][2:] // [2:]: skip "--"
 	if argName == "" {
 		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) > 3 for %d in %q: %w", i, args, ErrInternalBug)
@@ -18,27 +18,27 @@ func (defs *Definitions) parseLongOption(optM *OptionsTypedMap, chokeM *map[stri
 
 	key, value, valueFound := strings.Cut(argName, "=")
 
-	def, err := defs.find(key)
+	efKey, def, err := defs.find(key)
 	if err != nil {
 		return false, err
 	}
 
-	// bool, no space (lookahead)
-	if !valueFound && (def.Type == e_bool || def.AlsoBool) {
+	// bool has no lookahead, default = true
+	if value == "" && (def.Type == e_bool || def.AlsoBool) {
 		valueFound, value = true, "true"
 	}
 
-	// if needed, try to lookahead value (args: "--key", "value")
+	// try to lookahead value (args: "--key", "value")
 	if !valueFound && len(*args)-1 > *i {
 		lookArg := (*args)[*i+1]
 
-		valueFound := argumentKind(&lookArg) == e_argument
-		if valueFound {
-			nextWasConsumed, value = true, lookArg
+		consumedNext = argumentKind(&lookArg) == e_argument
+		if consumedNext {
+			value = lookArg
 		}
 	}
 
-	return nextWasConsumed, optM.parseOptionContent(&def, &value, &valueFound)
+	return consumedNext, optM.parseOptionContent(key, efKey, &def, value)
 }
 
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
@@ -53,22 +53,21 @@ func (defs *Definitions) parseShortOption(optM *OptionsTypedMap, argI *int, args
 	var negateNext bool
 	for optI, opt := range argRune {
 
-		valueFound, value := false, ""
-		optS := string(opt)
+		value := ""
+		key := string(opt)
 
-		if optS == "-" {
+		if key == "-" {
 			// new with harg: short option prefix "-" negates bools
 			negateNext = true
 			continue
 		}
 
-		def, err := defs.find(optS)
+		efKey, def, err := defs.find(key)
 		if err != nil {
 			return false, err
 		}
 
 		if def.Type == e_bool || def.AlsoBool {
-			valueFound = true
 			if negateNext {
 				value = "false"
 				negateNext = false
@@ -76,7 +75,7 @@ func (defs *Definitions) parseShortOption(optM *OptionsTypedMap, argI *int, args
 				value = "true"
 			}
 
-			err = optM.parseOptionContent(&def, &value, &valueFound)
+			err = optM.parseOptionContent(key, efKey, &def, value)
 			if err != nil {
 				return false, err
 			}
@@ -88,7 +87,7 @@ func (defs *Definitions) parseShortOption(optM *OptionsTypedMap, argI *int, args
 
 		if len(argRune)-1 == optI {
 			// value in same arg
-			valueFound, value = true, string(argRune[optI+1:])
+			value = string(argRune[optI+1:])
 		} else {
 			// no value, space reached, try to lookahead (args: "-o", "value")
 			if len(*args)-1 > *argI { // there are more args
@@ -100,13 +99,13 @@ func (defs *Definitions) parseShortOption(optM *OptionsTypedMap, argI *int, args
 				}
 			}
 		}
-		return true, optM.parseOptionContent(&def, &value, &valueFound)
+		return true, optM.parseOptionContent(key, efKey, &def, key)
 
 	}
 	return false, nil
 }
 
-func (defs *Definitions) find(key string) (Definition, error) {
+func (defs *Definitions) find(key string) (effectiveKey string, _ Definition, _ error) {
 	var errPrelude string
 	key = strings.ToLower(key)
 
@@ -118,7 +117,7 @@ func (defs *Definitions) find(key string) (Definition, error) {
 
 	def, ok := defs.D[key]
 	if ok {
-		return def, nil
+		return key, def, nil
 	}
 
 	if utf8.RuneCountInString(key) > 1 {
@@ -127,5 +126,5 @@ func (defs *Definitions) find(key string) (Definition, error) {
 		errPrelude += "short "
 	}
 
-	return Definition{}, fmt.Errorf(errPrelude+"option %s: %w", key, ErrOptionHasNoDefinition)
+	return "", Definition{}, fmt.Errorf(errPrelude+"option %s: %w", key, ErrOptionHasNoDefinition)
 }
