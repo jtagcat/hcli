@@ -10,7 +10,7 @@ import (
 // (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
-func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bool, i *int, args *[]string) (nextWasConsumed bool, _ error) {
+func (defs *Definitions) parseLongOption(optM *OptionsTypedMap, chokeM *map[string]bool, i *int, args *[]string) (nextWasConsumed bool, _ error) {
 	argName := (*args)[*i][2:] // [2:]: skip "--"
 	if argName == "" {
 		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) > 3 for %d in %q: %w", i, args, ErrInternalBug)
@@ -23,8 +23,8 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 		return false, err
 	}
 
-	// boolean, no space (lookahead)
-	if !valueFound && (def.Type == e_Boolean || def.AlsoBoolean) {
+	// bool, no space (lookahead)
+	if !valueFound && (def.Type == e_bool || def.AlsoBool) {
 		valueFound, value = true, "true"
 	}
 
@@ -44,7 +44,7 @@ func (defs *Definitions) parseLongOption(optM *OptionsMap, chokeM *map[string]bo
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
 //
 // caller should ensure len(args[i]) >= 2; and defs.checkDefs()
-func (defs *Definitions) parseShortOption(optM *OptionsMap, argI *int, args *[]string) (nextWasConsumed bool, _ error) {
+func (defs *Definitions) parseShortOption(optM *OptionsTypedMap, argI *int, args *[]string) (nextWasConsumed bool, _ error) {
 	argRune := []rune((*args)[*argI][1:]) // [1:]: skip 0th "-"
 	if len(argRune) == 0 {
 		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) >= 2 for %d in %q: %w", argI, args, ErrInternalBug)
@@ -57,7 +57,7 @@ func (defs *Definitions) parseShortOption(optM *OptionsMap, argI *int, args *[]s
 		optS := string(opt)
 
 		if optS == "-" {
-			// new with harg: short option prefix "-" negates booleans
+			// new with harg: short option prefix "-" negates bools
 			negateNext = true
 			continue
 		}
@@ -67,7 +67,7 @@ func (defs *Definitions) parseShortOption(optM *OptionsMap, argI *int, args *[]s
 			return false, err
 		}
 
-		if def.Type == e_Boolean || def.AlsoBoolean {
+		if def.Type == e_bool || def.AlsoBool {
 			valueFound = true
 			if negateNext {
 				value = "false"

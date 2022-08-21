@@ -17,30 +17,32 @@ type (
 	DefinitionMap map[string]Definition // map[slug]; 1-character: short option, >1: long option
 	Definition    struct {
 		Type      Type
-		Countable bool // where seen as boolean, see as countable (-vvv) instead.
+		Countable bool // where seen as bool, see as countable (-vvv) instead.
 		Slice     bool // where seen as value, append to slice instead of ignoring all but last
 
-		// For short options (1-char length), true means it's always boolean
+		// For short options (1-char length), true means it's always bool
 		// For long options:
 		//   false: allows spaces (`--slug value` in addition to `--slug=value`)
-		//   true: if "=" is not used, Type is changed to boolean (or countable)
-		AlsoBoolean bool
+		//   true: if "=" is not used, Type is changed to bool (or countable)
+		AlsoBool bool
 	}
 	Type int // enum
 )
 
 const ( // enum
-	e_Boolean Type = iota
+	e_bool Type = iota
 	// doesn't seem the best way, but let's try
-	e_String
-	e_Integer
+	e_string
+	e_int
+	e_int64
 	// TODO: ...?
 )
 
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrMixedSliceAlsoBoolean = errors.New("slice option with AlsoBoolean can't be given both boolean and slice inputs") // --foo=value --foo --foo=value
+	ErrMixedSliceAlsoBool    = errors.New("slice option with AlsoBool can't be given both bool and slice inputs") // --foo=value --foo --foo=value
+	ErrIncompatibleValue     = errors.New("")                                                                     // TODO: strconv.Atoi("this is not a number")
 
 	// runtime error
 	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet
@@ -58,7 +60,7 @@ func (defs *Definitions) Parse(
 	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke
 	// Chokes are not seen after "--", or in places of argument values ("--foo choke", "-f choke")
 ) (
-	_ OptionsMap, // parsed options
+	_ OptionsTypedMap, // parsed options
 	parsed []string, // non-options, arguments
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
