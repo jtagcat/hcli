@@ -21,17 +21,17 @@ type (
 		// For short options (1-char length), true means it's always bool
 		// For long options:
 		//   false: allows spaces (`--slug value` in addition to `--slug=value`)
-		//   true: if "=" is not used, Type is changed to bool (or countable)
-		AlsoBool bool // ErrMixedValueInAlsoBool if --type
-		// TODO: sudden stop human.log, implement bool for if
+		//   true: if "=" is not used, Type is changed to bool (or countable). Values are treated as bools, if strconv.ParseBool says so.
+		// If bool is encountered after value, ErrBoolAfterValue will be returned on parsing. Any bools before value flags will be ignored.
+		AlsoBool bool
 	}
 )
 
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrMixedValueInAlsoBool  = errors.New("AlsoBool can't be given both bool and value inputs") // --foo=value --foo --foo=value
-	ErrIncompatibleValue     = errors.New("")                                                   // TODO: strconv.Atoi("this is not a number")
+	ErrBoolAfterValue        = errors.New("AlsoBool does not accept bools after value inputs") // --foo=value --foo --foo=value
+	ErrIncompatibleValue     = errors.New("")                                                  // TODO: strconv.Atoi("this is not a number")
 
 	// runtime error
 	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet

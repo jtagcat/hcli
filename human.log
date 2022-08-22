@@ -1,6 +1,6 @@
 TODO: 
-1. parseOptionContent for bool and string
-1. generation or something else?
-1. see if it is anything usable??
-1. bash completions based on definitions
-1. streamline/optimize errors
+ - testing
+ - code generation?
+ - bash completions based on definitions
+ - streamline/optimize errors
+ - henv (harg with environment variables), urfave/cli@v3 implementation

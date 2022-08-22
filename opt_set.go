@@ -15,29 +15,22 @@ func (optM *OptionsMap) parseOptionContent(
 
 	if def.AlsoBool {
 		boolOpt := typeEmptyM[e_bool]
+
 		err := boolOpt.add(value)
-		if err == nil && nativeOK { // we already have a native opt
-			return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, boolOpt.typeName(), ErrMixedValueInAlsoBool)
+		if err == nil {
+			if nativeOK { // we already have a native opt
+				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, boolOpt.typeName(), ErrBoolAfterValue)
+			}
+
+			(*optM)[effectiveKey] = boolOpt
 		}
 
-		// TODO: use loops, bool.add()
-		// boolVal, err := strconv.ParseBool(value) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
-		// if err == nil {
+		// err != nil
+		if def.Type == e_bool {
+			return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, boolOpt.typeName(), ErrIncompatibleValue, err)
+		}
 
-		// 	// TODO:
-
-		// 	if def.Type == e_bool {
-		// 	}
-
-		// 	return nil
-		// }
-
-		// // err != nil
-		// if def.Type == e_bool {
-		// 	return fmt.Errorf("parsing option %s with definition %s as type bool: %w", originalKey, effectiveKey, err)
-		// }
-
-		// // AlsoBool continues to switch
+		// Valueful AlsoBool continues to switch
 	}
 
 	// valueful
@@ -50,7 +43,7 @@ func (optM *OptionsMap) parseOptionContent(
 		return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
 	}
 
-	typeM[effectiveKey] = opt
+	(*optM)[effectiveKey] = opt
 	return nil
 }
 
