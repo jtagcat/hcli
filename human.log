@@ -1,4 +1,5 @@
-TODO: 
+TODO:
+ - Merge options to definitions? Refactor, reduce panic and faultpoints.
  - testing
  - code generation?
  - bash completions based on definitions
