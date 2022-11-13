@@ -111,8 +111,8 @@ func (defs *Definitions) find(key string) (effectiveKey string, _ Definition, _ 
 
 	aliasKey, isAlias := defs.Aliases[key]
 	if isAlias {
-		key = *aliasKey
-		errPrelude += fmt.Sprintf("alias %s: ", *aliasKey)
+		key = aliasKey
+		errPrelude += fmt.Sprintf("alias %s: ", aliasKey)
 	}
 
 	def, ok := defs.D[key]

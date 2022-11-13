@@ -12,7 +12,7 @@ import (
 type (
 	Definitions struct {
 		D       DefinitionMap
-		Aliases map[string]*string // map[alias slug]defSlug
+		Aliases map[string]string // map[alias slug]defSlug
 	}
 	DefinitionMap map[string]Definition // map[slug]; 1-character: short option, >1: long option
 	Definition    struct {
