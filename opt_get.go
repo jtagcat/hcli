@@ -33,7 +33,7 @@ func (def *Definition) ok(needed Type) error {
 // bool
 
 func (def *Definition) SlBool() ([]bool, error) {
-	if err := def.ok(e_bool); err != nil {
+	if err := def.ok(Bool); err != nil {
 		return nil, fmt.Errorf("SlBool: %w", err)
 	}
 
@@ -55,7 +55,7 @@ func (def *Definition) Bool() (bool, error) {
 // true: 1,
 // true true true: 3,
 func (def *Definition) Count() (int, error) {
-	if err := def.ok(e_bool); err != nil {
+	if err := def.ok(Bool); err != nil {
 		return 0, fmt.Errorf("Count: %w", err)
 	}
 	return def.parsed.iface.contents().(optBoolVal).count, nil
@@ -63,7 +63,7 @@ func (def *Definition) Count() (int, error) {
 
 // AlsoBool
 func (def *Definition) IsBool() bool {
-	return def.Type == e_bool // type is changed to e_bool on parsing if
+	return def.Type == Bool // type is changed to e_bool on parsing if
 }
 
 //// generatable ////
@@ -71,7 +71,7 @@ func (def *Definition) IsBool() bool {
 // string
 
 func (def *Definition) SlString() ([]string, error) {
-	if err := def.ok(e_string); err != nil {
+	if err := def.ok(String); err != nil {
 		return nil, fmt.Errorf("SlString: %w", err)
 	}
 	return def.parsed.iface.contents().([]string), nil
@@ -88,7 +88,7 @@ func (def *Definition) String() (string, error) {
 // int
 
 func (def *Definition) SlInt() ([]int, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlInt: %w", err)
 	}
 	return def.parsed.iface.contents().([]int), nil
@@ -105,7 +105,7 @@ func (def *Definition) Int() (int, error) {
 // int64
 
 func (def *Definition) SlInt64() ([]int64, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlInt64: %w", err)
 	}
 	return def.parsed.iface.contents().([]int64), nil
@@ -122,7 +122,7 @@ func (def *Definition) Int64() (int64, error) {
 // uint
 
 func (def *Definition) SlUint() ([]uint, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlUint: %w", err)
 	}
 	return def.parsed.iface.contents().([]uint), nil
@@ -139,7 +139,7 @@ func (def *Definition) Uint() (uint, error) {
 // uint64
 
 func (def *Definition) SlUint64() ([]uint64, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlUint64: %w", err)
 	}
 	return def.parsed.iface.contents().([]uint64), nil
@@ -156,7 +156,7 @@ func (def *Definition) Uint64() (uint64, error) {
 // float64
 
 func (def *Definition) SlFloat64() ([]float64, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlFloat64: %w", err)
 	}
 	return def.parsed.iface.contents().([]float64), nil
@@ -173,7 +173,7 @@ func (def *Definition) Float64() (float64, error) {
 // duration
 
 func (def *Definition) SlDuration() ([]time.Duration, error) {
-	if err := def.ok(e_int); err != nil {
+	if err := def.ok(Int); err != nil {
 		return nil, fmt.Errorf("SlDuration: %w", err)
 	}
 	return def.parsed.iface.contents().([]time.Duration), nil

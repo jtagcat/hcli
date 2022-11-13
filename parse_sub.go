@@ -24,7 +24,7 @@ func (defs *Definitions) parseLongOption(i *int, args *[]string) (consumedNext b
 	}
 
 	// bool has no lookahead, default = true
-	if value == "" && (def.Type == e_bool || def.AlsoBool) {
+	if value == "" && (def.Type == Bool || def.AlsoBool) {
 		valueFound, value = true, "true"
 	}
 
@@ -67,7 +67,7 @@ func (defs *Definitions) parseShortOption(argI *int, args *[]string) (nextWasCon
 			return false, err
 		}
 
-		if def.Type == e_bool || def.AlsoBool {
+		if def.Type == Bool || def.AlsoBool {
 			if negateNext {
 				value = "false"
 				negateNext = false

@@ -60,31 +60,32 @@ type option interface {
 	add(rawOpt string) error // string: type name (to use in error)
 }
 
-type Type int // enum
-const (       // enum
-	e_bool Type = iota
+type Type uint32 // enum
+
+const ( // enum
+	Bool Type = iota
 	// doesn't seem the best way, but let's try
-	e_string
-	e_int
-	e_int64
-	e_uint
-	e_uint64
-	e_float64
-	e_duration
+	String
+	Int
+	Int64
+	Uint
+	Uint64
+	Float64
+	Duration
 )
 
 var typeMetaM = map[Type]struct {
 	name   string
 	emptyT option
 }{
-	e_bool:     {"bool", &optBool{}},
-	e_string:   {"string", &optString{}},
-	e_int:      {"int", &optInt{}},
-	e_int64:    {"int64", &optInt64{}},
-	e_uint:     {"uint", &optUint{}},
-	e_uint64:   {"uint64", &optUint64{}},
-	e_float64:  {"float64", &optFloat64{}},
-	e_duration: {"duration", &optDuration{}},
+	Bool:     {"bool", &optBool{}},
+	String:   {"string", &optString{}},
+	Int:      {"int", &optInt{}},
+	Int64:    {"int64", &optInt64{}},
+	Uint:     {"uint", &optUint{}},
+	Uint64:   {"uint64", &optUint64{}},
+	Float64:  {"float64", &optFloat64{}},
+	Duration: {"duration", &optDuration{}},
 }
 
 // bool / count
