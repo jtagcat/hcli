@@ -40,7 +40,6 @@ func (def *Definition) parseOptionContent(
 	if err := def.parsed.opt.add(value); err != nil {
 
 		err = fmt.Errorf("%e: %w", ErrIncompatibleValue, err) // add ErrIncompatibleValue, as it is universally comparable
-
 		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, err)
 	}
 

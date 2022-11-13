@@ -71,13 +71,13 @@ func (defs *Definitions) Parse(
 			return parsed, nil, nil
 
 		case shortOption:
-			skipNext, err = defs.parseShortOption(&i, &args)
+			skipNext, err = defs.parseShortOption(i, args)
 			if err != nil {
 				return nil, nil, err
 			}
 
 		case longOption:
-			skipNext, err = defs.parseLongOption(&i, &args) // len(a) >= 3
+			skipNext, err = defs.parseLongOption(i, args) // len(a) >= 3
 			if err != nil {
 				return nil, nil, err
 			}
