@@ -1,6 +1,10 @@
 package harg
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+	"unicode/utf8"
+)
 
 func (defs Definitions) SetAlias(name string, to string) error {
 	defP, ok := defs[to]
@@ -33,3 +37,24 @@ type (
 		opt          option
 	}
 )
+
+func (defs Definitions) normalize() {
+	for name, def := range defs {
+		if def == nil {
+			delete(defs, name)
+			continue
+		}
+
+		// short args are case sensitive, skip
+		if utf8.RuneCountInString(name) == 1 {
+			continue
+		}
+
+		// case insensitivize long args
+		lower := strings.ToLower(name)
+		if name != lower {
+			defs[lower] = def
+			delete(defs, name)
+		}
+	}
+}

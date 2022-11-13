@@ -40,12 +40,7 @@ func (defs *Definitions) Parse(
 ) {
 	args = args[1:] // remove program name //TODO: should this be external?
 
-	defs = func() *Definitions {
-		lowercased := Definitions(
-			internal.LowercaseLongMapNames(*defs),
-		)
-		return &lowercased
-	}()
+	defs.normalize()
 
 	chokeM := internal.SliceToLowercaseMap(chokes)
 
