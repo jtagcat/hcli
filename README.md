@@ -2,11 +2,9 @@
 
 GNU-compatible feature-complete Go argument parsing. See [FORMAT.md](FORMAT.md) for full specification.
 
-Finally something good for Go arguments.
-
 See also: https://github.com/urfave/cli/issues/833#issuecomment-1312834335
 
-Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-friendly arguments' and 'harrrggghh!' 🏴‍☠️
+Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-friendly arguments' and 'harrrggghh!' 🏴‍☠️, finally something good for Go arguments!
 
 ## Left to do:
 - Finish writing specification tests in [parse_test.go](parse_test.go).
