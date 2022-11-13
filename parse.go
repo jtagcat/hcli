@@ -21,6 +21,7 @@ var (
 	ErrInternalBug = errors.New("internal bug in harg or undefined enum") // anti-panic safetynet
 )
 
+// Parse Definitions. See FORMAT.md for the spec. See parse_test.go for examples.
 func (defs *Definitions) Parse(
 	args []string, // usually os.Args[1:]
 	// NB: Parse() does not remove program name (os.Args[0])
