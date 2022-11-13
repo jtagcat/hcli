@@ -6,10 +6,11 @@ import (
 	"unicode/utf8"
 )
 
-// bool carries no meaning
-func SliceToLowercaseMap(s []string) (m map[string]bool) {
+func SliceLowercaseIndex(s []string) map[string]struct{} {
+	m := make(map[string]struct{})
+
 	for _, str := range s {
-		m[strings.ToLower(str)] = false
+		m[strings.ToLower(str)] = struct{}{}
 	}
 	return m
 }
