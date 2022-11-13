@@ -14,7 +14,7 @@ func (def *Definition) IsBool() bool {
 	return def.Type == Bool
 }
 
-// count is equal to the count of consecutive true bools counting from right
+// count is equal to the count of consecutive true values read from right/last
 //
 // true false true true: 2,
 // true false: 0,
