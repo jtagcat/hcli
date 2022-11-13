@@ -14,30 +14,30 @@ func (def *Definition) parseOptionContent(
 ) error { // errContext provided
 	// defs.normalize(): actual Type == Bool can never be AlsoBool
 
-	var notAlsoBool bool
 	if def.AlsoBool &&
 		// try parsing as AlsoBool only when not already parsed as non-bool
-		(def.parsed.opt == nil || def.Type == Bool) {
+		(def.parsed == nil || def.Type == Bool) {
 
-		if def.parsed.opt == nil {
-			def.parsed.opt = typeMetaM[Bool].emptyT
+		if def.parsed == nil {
+			def.parsed = typeMetaM[Bool].emptyT
 		}
 
-		if err := def.parsed.opt.add(value); err == nil {
+		if err := def.parsed.add(value); err == nil {
+			def.originalType = def.Type
 			def.Type = Bool
 			return nil
 		}
 
-		notAlsoBool = true
+		def.parsed, def.Type = nil, def.originalType
 		// on err continue to parse normally:
 	}
 
 	// initialize option interface
-	if def.parsed.opt == nil || notAlsoBool {
-		def.parsed.opt = typeMetaM[def.Type].emptyT
+	if def.parsed == nil {
+		def.parsed = typeMetaM[def.Type].emptyT
 	}
 
-	if err := def.parsed.opt.add(value); err != nil {
+	if err := def.parsed.add(value); err != nil {
 
 		err = fmt.Errorf("%e: %w", ErrIncompatibleValue, err) // add ErrIncompatibleValue, as it is universally comparable
 		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, err)

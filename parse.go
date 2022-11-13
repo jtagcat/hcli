@@ -11,8 +11,7 @@ import (
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrBoolAfterValue        = errors.New("AlsoBool does not accept booleans after valueful uses") // --foo=value --foo --foo=value
-	ErrIncompatibleValue     = errors.New("incompatible value")                                    // eg strconv.Atoi("this is not a number")
+	ErrIncompatibleValue     = errors.New("incompatible value") // eg strconv.Atoi("this is not a number")
 
 	// library user error (always returned on Parse())
 	ErrInvalidDefinition = errors.New("invalid definition")

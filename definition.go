@@ -8,6 +8,23 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
+type (
+	Definitions map[string]*Definition // map[slug]; 1-character: short option, >1: long option
+	Definition  struct {
+		Type Type
+
+		// For short options (1-char length), this is ignored.
+		// For long options:
+		//   false: Allows spaces (`--slug value`), in addition to `=` (`--slug=value`).
+		//   true: When "=" is not used, Type is Bool. Values (in `--slug=value`) are treated as bools, if strconv.ParseBool says so.
+		// Bools before a parsed Type are ignored. Any bools after Type are parsed as Type, and may result in ErrIncompatibleValue.
+		AlsoBool bool
+
+		originalType Type // used in parsing AlsoBool
+		parsed       option
+	}
+)
+
 func (defs Definitions) Alias(name string, to string) error {
 	defP, ok := defs[to]
 	if !ok {
@@ -17,26 +34,6 @@ func (defs Definitions) Alias(name string, to string) error {
 	defs[name] = defP
 	return nil
 }
-
-type (
-	Definitions map[string]*Definition // map[slug]; 1-character: short option, >1: long option
-	Definition  struct {
-		Type Type
-
-		// For short options (1-char length), true means it's always bool
-		// For long options:
-		//   false: allows spaces (`--slug value` in addition to `--slug=value`)
-		//   true: if "=" is not used, Type is changed to bool (or countable). Values are treated as bools, if strconv.ParseBool says so.
-		// If bool is encountered after value, ErrBoolAfterValue will be returned on parsing. Any bools before value flags will be ignored.
-		AlsoBool bool
-
-		// use Definition.Methods() to get data, #TODO:
-		parsed parsedT
-	}
-	parsedT struct {
-		opt option
-	}
-)
 
 func (defs Definitions) normalize() error {
 	for name, def := range defs {
