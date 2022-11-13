@@ -23,8 +23,7 @@ func (def *Definition) parseOptionContent(
 			def.parsed.opt = typeMetaM[Bool].emptyT
 		}
 
-		err := def.parsed.opt.add(value)
-		if err == nil {
+		if err := def.parsed.opt.add(value); err == nil {
 			def.Type = Bool
 			return nil
 		}
@@ -38,9 +37,11 @@ func (def *Definition) parseOptionContent(
 		def.parsed.opt = typeMetaM[def.Type].emptyT
 	}
 
-	err := def.parsed.opt.add(value)
-	if err != nil {
-		return fmt.Errorf("parsing %s as %s: %w: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, ErrIncompatibleValue, err)
+	if err := def.parsed.opt.add(value); err != nil {
+
+		err = fmt.Errorf("%e: %w", ErrIncompatibleValue, err) // add ErrIncompatibleValue, as it is universally comparable
+
+		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, err)
 	}
 
 	return nil
