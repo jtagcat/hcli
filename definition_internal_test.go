@@ -10,7 +10,9 @@ func TestDefinitionNormalizeNilMap(t *testing.T) {
 
 	defs := Definitions{}
 
-	defs.normalize()
+	if err := defs.normalize(); err != nil {
+		t.Error(err)
+	}
 
 	if _, ok := defs["test"]; ok {
 		t.Error("Definitions should be empty, but still usable")

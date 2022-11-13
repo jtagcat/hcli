@@ -10,14 +10,11 @@ import (
 
 var (
 	// end user (runtime) error
-	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrIncompatibleValue     = errors.New("incompatible value") // eg strconv.Atoi("this is not a number")
+	ErrOptionHasNoDefinition = errors.New("option has no definition") // or invalid Alias() target
+	ErrIncompatibleValue     = errors.New("incompatible value")       // eg strconv.Atoi("this is not a number")
 
-	// library user error (always returned on Parse())
+	// library user error; always returned on Parse()
 	ErrInvalidDefinition = errors.New("invalid definition")
-
-	// runtime error //TODO:
-	ErrInternalBug = errors.New("internal bug in harg or undefined enum") // anti-panic safetynet
 )
 
 // Parse Definitions. See FORMAT.md for the spec. See parse_test.go for examples.
@@ -35,10 +32,10 @@ func (defs *Definitions) Parse(
 	//
 	// Chokes are not seen after "--", or in argument values ("--foo choke", "-f choke")
 ) (
-	// parsed options get added to defs (method parent)
+	// parsed options get added to defs, see option_get.go (def.Touched(), .SlString(), .String(), ...)
 	parsed []string, // non-options, arguments
-	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
-	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
+	chokeReturn []string, // See above
+	err error, // see above var() for possible errors
 ) {
 	if err := defs.normalize(); err != nil {
 		return nil, nil, err
@@ -71,13 +68,13 @@ func (defs *Definitions) Parse(
 			return parsed, nil, nil
 
 		case shortOption:
-			skipNext, err = defs.parseShortOption(i, args)
+			skipNext, err = defs.parseShortOption(i, args) // len(a) > 1 or parseShortOption panics
 			if err != nil {
 				return nil, nil, err
 			}
 
 		case longOption:
-			skipNext, err = defs.parseLongOption(i, args) // len(a) >= 3
+			skipNext, err = defs.parseLongOption(i, args) // len(a) > 2 or parseLongOption panics
 			if err != nil {
 				return nil, nil, err
 			}
@@ -103,7 +100,7 @@ func argumentKind(arg *string) argumentKindT {
 
 	// "-x"
 	if !strings.HasPrefix((*arg)[1:], "-") {
-		return shortOption
+		return shortOption // len(a) > 1 or parseShortOption panics
 	}
 
 	// begins with "--"
@@ -111,8 +108,8 @@ func argumentKind(arg *string) argumentKindT {
 	case 2: // "--"
 		return argumentDivider
 	case 3: // "--x", single negative short
-		return shortOption
-	default: // > 3
+		return shortOption // len(a) > 1 or parseShortOption panics
+	default: // >= 3 or parseLongOption panics
 		return longOption
 	}
 }

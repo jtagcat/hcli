@@ -10,6 +10,7 @@ Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-
 - Finish writing specification tests in [parse_test.go](parse_test.go).
 - Review codebase errors, flow clarity, and overall.
 - Example use for pkg.go.dev / README.md.
+- `strconv` says `t` and `f` are bools, and `y`, `n`, `yes`, `no` aren't. Are they?
 
 ### Next up:
 - henv: Environment variables

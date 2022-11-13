@@ -25,10 +25,10 @@ type (
 	}
 )
 
-func (defs Definitions) Alias(name string, to string) error {
-	defP, ok := defs[to]
+func (defs Definitions) Alias(name string, target string) error {
+	defP, ok := defs[target]
 	if !ok {
-		return fmt.Errorf("definition name %s: %w", to, ErrOptionHasNoDefinition)
+		return fmt.Errorf("definition name %s: %w", target, ErrOptionHasNoDefinition)
 	}
 
 	defs[name] = defP

@@ -57,7 +57,8 @@ func TestAliasParse(t *testing.T) {
 	defs := harg.Definitions{
 		oneKey: {Type: harg.String},
 	}
-	defs.Alias("twõ", oneKey)
+	assert.Nil(t,
+		defs.Alias("twõ", oneKey))
 
 	args, chokeReturn, err := defs.Parse(
 		[]string{

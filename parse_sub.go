@@ -12,9 +12,9 @@ import (
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
 func (defs *Definitions) parseLongOption(first int, args []string) (consumedNext bool, _ error) {
-	argName := args[first][2:] // [2:]: skip "--"
+	argName := args[first][2:] // [2:]: remove suffix "--"
 	if argName == "" {
-		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) > 3 for %d in %q: %w", first, args, ErrInternalBug)
+		panic(fmt.Sprintf("parseLongOption caller did not ensure len(args[i]) > 2 for %d in %q", first, args))
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
@@ -48,7 +48,7 @@ func (defs *Definitions) parseLongOption(first int, args []string) (consumedNext
 func (defs *Definitions) parseShortOption(first int, args []string) (nextWasConsumed bool, _ error) {
 	argRune := []rune(args[first][1:]) // [1:]: skip 0th "-"
 	if len(argRune) == 0 {
-		return false, fmt.Errorf("parseLongOption caller did not ensure len(args[i]) >= 2 for %d in %q: %w", first, args, ErrInternalBug)
+		panic(fmt.Sprintf("parseShort caller did not ensure len(args[i]) > 1 for %d in %q", first, args))
 	}
 
 	var negateNext bool

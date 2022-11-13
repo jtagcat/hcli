@@ -95,12 +95,12 @@ func (o *optBool) contents() any {
 }
 
 func (o *optBool) add(s string) error {
-	v, err := strconv.ParseBool(s) // TODO: drop "t", "f", add "yes", "no", maybe also "y", "n"
+	v, err := strconv.ParseBool(s)
 	if err != nil {
 		return err
 	}
 
-	if v == true {
+	if v {
 		o.value.count++
 	} else {
 		o.value.count = 0
