@@ -34,7 +34,7 @@ func (def *Definition) parseOptionContent(
 
 		// non-bool AlsoBool continues to switch
 		if def.parsed.found { // restore original
-			def.Type = def.parsed.originalType
+			def.parsed.originalType = def.Type
 			if def.Type == Bool { // discard previous bools
 				def.parsed.found = false
 			}
