@@ -22,7 +22,8 @@ var (
 )
 
 func (defs *Definitions) Parse(
-	args []string, // usually os.Args
+	args []string, // usually os.Args[1:]
+	// NB: Parse() does not remove program name (os.Args[0])
 
 	chokes []string, // [case insensitive]
 	// Chokes allow for global-local-whatever argument definitions by using Parse() multiple times:
@@ -39,8 +40,6 @@ func (defs *Definitions) Parse(
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
 ) {
-	args = args[1:] // remove program name //TODO: should this be external?
-
 	if err := defs.normalize(); err != nil {
 		return nil, nil, err
 	}
