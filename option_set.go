@@ -53,7 +53,6 @@ type option interface {
 }
 
 type Type uint32 // enum:
-var typeMax = 7  //
 const (
 	Bool Type = iota
 	String
@@ -63,7 +62,8 @@ const (
 	Uint64
 	Float64
 	Duration
-)
+) //
+var typeMax = Duration
 
 var typeMetaM = map[Type]struct {
 	errName string

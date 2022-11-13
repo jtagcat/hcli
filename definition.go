@@ -8,7 +8,7 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
-func (defs Definitions) SetAlias(name string, to string) error {
+func (defs Definitions) Alias(name string, to string) error {
 	defP, ok := defs[to]
 	if !ok {
 		return fmt.Errorf("definition name %s: %w", to, ErrOptionHasNoDefinition)
@@ -45,7 +45,7 @@ func (defs Definitions) normalize() error {
 			continue
 		}
 
-		if int(def.Type) > typeMax {
+		if def.Type > typeMax {
 			return fmt.Errorf("%s: %w", internal.KeyErrorName(name), ErrInvalidDefinition)
 		}
 

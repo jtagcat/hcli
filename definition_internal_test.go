@@ -1,6 +1,7 @@
 package harg
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -32,7 +33,10 @@ func TestDefinitionNormalize(t *testing.T) {
 			AlsoBool: true,
 		},
 	}
-	defs.normalize()
+
+	if err := defs.normalize(); err != nil {
+		t.Fatal(err)
+	}
 
 	for _, name := range []string{"test", "nil", "Uppercase"} {
 		if _, ok := defs[name]; ok {
@@ -51,5 +55,28 @@ func TestDefinitionNormalize(t *testing.T) {
 	}
 	if def := defs["s"]; def.AlsoBool == true {
 		t.Errorf("s AlsoBool should be false")
+	}
+}
+
+func TestDefinitionOverMax(t *testing.T) {
+	t.Parallel()
+
+	defs := Definitions{
+		"Bad": &Definition{
+			Type: Type(int(typeMax) + 1),
+		},
+	}
+
+	err := defs.normalize()
+	if !errors.Is(err, ErrInvalidDefinition) {
+		t.Fatalf("error not %e, is %e", ErrInvalidDefinition, err)
+	}
+}
+
+func TestTypeMetaMLen(t *testing.T) {
+	t.Parallel()
+
+	if len(typeMetaM) != int(typeMax)+1 {
+		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(typeMetaM), int(typeMax)+1)
 	}
 }

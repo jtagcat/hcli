@@ -16,7 +16,7 @@ func TestSetAlias(t *testing.T) {
 	defs := defsOriginal
 
 	assert.ErrorIs(t,
-		defs.SetAlias("alias", "invalid"),
+		defs.Alias("alias", "invalid"),
 		harg.ErrOptionHasNoDefinition,
 	)
 	assert.Equal(t, defsOriginal, defs)
@@ -26,6 +26,6 @@ func TestSetAlias(t *testing.T) {
 	defs = defsOriginal
 
 	assert.Nil(t,
-		defs.SetAlias("alias", "foo"))
+		defs.Alias("alias", "foo"))
 	assert.Equal(t, harg.String, defs["alias"].Type)
 }
