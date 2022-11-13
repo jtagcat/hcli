@@ -45,6 +45,10 @@ func (defs Definitions) normalize() {
 			continue
 		}
 
+		if def.Type == Bool && def.AlsoBool {
+			def.AlsoBool = false
+		}
+
 		// short args are case sensitive, skip
 		if utf8.RuneCountInString(name) == 1 {
 			continue

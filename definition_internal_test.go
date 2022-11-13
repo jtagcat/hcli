@@ -23,8 +23,14 @@ func TestDefinitionNormalize(t *testing.T) {
 		"nil":       nil,
 		"Uppercase": &Definition{},
 		"lowercase": &Definition{},
-		"S":         &Definition{},
-		"s":         &Definition{},
+		"S": &Definition{
+			Type:     String,
+			AlsoBool: true,
+		},
+		"s": &Definition{
+			Type:     Bool,
+			AlsoBool: true,
+		},
 	}
 	defs.normalize()
 
@@ -38,5 +44,12 @@ func TestDefinitionNormalize(t *testing.T) {
 		if _, ok := defs[name]; !ok {
 			t.Errorf("%s should be in Definitions", name)
 		}
+	}
+
+	if def := defs["S"]; def.AlsoBool == false {
+		t.Errorf("S AlsoBool should be true")
+	}
+	if def := defs["s"]; def.AlsoBool == true {
+		t.Errorf("s AlsoBool should be false")
 	}
 }
