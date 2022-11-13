@@ -3,7 +3,8 @@ package harg
 import (
 	"fmt"
 	"strings"
-	"unicode/utf8"
+
+	"github.com/jtagcat/harg/internal"
 )
 
 // long option (--foo) (--foo=value) ?(--foo value)
@@ -18,7 +19,7 @@ func (defs *Definitions) parseLongOption(i *int, args *[]string) (consumedNext b
 
 	key, value, valueFound := strings.Cut(argName, "=")
 
-	efKey, def, err := defs.find(key)
+	def, err := defs.get(key)
 	if err != nil {
 		return false, err
 	}
@@ -38,7 +39,7 @@ func (defs *Definitions) parseLongOption(i *int, args *[]string) (consumedNext b
 		}
 	}
 
-	return consumedNext, def.parseOptionContent(key, efKey, value)
+	return consumedNext, def.parseOptionContent(key, value)
 }
 
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
@@ -62,7 +63,7 @@ func (defs *Definitions) parseShortOption(argI *int, args *[]string) (nextWasCon
 			continue
 		}
 
-		efKey, def, err := defs.find(key)
+		def, err := defs.get(key)
 		if err != nil {
 			return false, err
 		}
@@ -75,7 +76,7 @@ func (defs *Definitions) parseShortOption(argI *int, args *[]string) (nextWasCon
 				value = "true"
 			}
 
-			err = def.parseOptionContent(key, efKey, value)
+			err = def.parseOptionContent(key, value)
 			if err != nil {
 				return false, err
 			}
@@ -99,32 +100,19 @@ func (defs *Definitions) parseShortOption(argI *int, args *[]string) (nextWasCon
 				}
 			}
 		}
-		return true, def.parseOptionContent(key, efKey, value)
+		return true, def.parseOptionContent(key, value)
 
 	}
 	return false, nil
 }
 
-func (defs *Definitions) find(key string) (effectiveKey string, _ Definition, _ error) {
-	var errPrelude string
+func (defs Definitions) get(key string) (*Definition, error) {
 	key = strings.ToLower(key)
 
-	aliasKey, isAlias := defs.Aliases[key]
-	if isAlias {
-		key = aliasKey
-		errPrelude += fmt.Sprintf("alias %s: ", aliasKey)
-	}
-
-	def, ok := defs.D[key]
+	def, ok := defs[key]
 	if ok {
-		return key, def, nil
+		return def, nil
 	}
 
-	if utf8.RuneCountInString(key) > 1 {
-		errPrelude += "long "
-	} else {
-		errPrelude += "short "
-	}
-
-	return "", Definition{}, fmt.Errorf(errPrelude+"option %s: %w", key, ErrOptionHasNoDefinition)
+	return nil, fmt.Errorf("%s: %w", internal.KeyErrorName(key), ErrOptionHasNoDefinition)
 }

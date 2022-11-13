@@ -2,7 +2,6 @@ package harg
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 	"unicode/utf8"
 
@@ -39,11 +38,15 @@ func (defs *Definitions) Parse(
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
 ) {
-	args = args[1:] // remove program name TODO: should this be external?
+	args = args[1:] // remove program name //TODO: should this be external?
 
-	if err := defs.checkDefs(); err != nil {
-		return nil, nil, err
-	}
+	defs = func() *Definitions {
+		lowercased := Definitions(
+			internal.LowercaseLongMapNames(*defs),
+		)
+		return &lowercased
+	}()
+
 	chokeM := internal.SliceToLowercaseMap(chokes)
 
 	var skipNext bool
@@ -84,18 +87,6 @@ func (defs *Definitions) Parse(
 
 	}
 	return parsed, nil, nil
-}
-
-func (defs *Definitions) checkDefs() error {
-	defs.D = internal.LowercaseLongMapNames(defs.D)
-	defs.Aliases = internal.LowercaseLongMapNames(defs.Aliases)
-
-	for n := range defs.D {
-		if _, ok := defs.Aliases[n]; ok {
-			return fmt.Errorf("option definition %s: %w", n, ErrSlugConflict)
-		}
-	}
-	return nil
 }
 
 type argumentKindT int

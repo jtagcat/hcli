@@ -1,6 +1,7 @@
-package harg
+package internal
 
 import (
+	"fmt"
 	"strings"
 	"unicode/utf8"
 )
@@ -15,7 +16,8 @@ func SliceToLowercaseMap(s []string) (m map[string]bool) {
 
 // TODO: test
 // TODO: use LowerCaseLongKey
-func LowercaseLongMapNames[T any](m map[string]T) map[string]T {
+// TODO: redo
+func LowercaseLongMapNames[T any](m map[string]*T) map[string]*T {
 	for name, data := range m {
 		// short args are case sensitive, skip
 		if utf8.RuneCountInString(name) == 1 {
@@ -38,4 +40,15 @@ func LowercaseLongKey(key string) string {
 	}
 
 	return strings.ToLower(key)
+}
+
+func KeyErrorName(key string) string {
+	var keyType string
+	if utf8.RuneCountInString(key) > 1 {
+		keyType = "long"
+	} else {
+		keyType = "short"
+	}
+
+	return fmt.Sprintf("%s option %s", keyType, key)
 }

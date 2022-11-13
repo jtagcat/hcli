@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	internal "github.com/jtagcat/harg/internal"
 )
 
 func (def *Definition) parseOptionContent(
-	originalKey string, // may be alias name or == effectiveKey
-	effectiveKey string,
+	key string,
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
 
@@ -21,7 +22,7 @@ func (def *Definition) parseOptionContent(
 		err := boolFace.add(value)
 		if err == nil {
 			if def.parsed.found && def.Type != Bool { // we have already parsed opt with native type
-				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, typeMetaM[Bool].name, ErrBoolAfterValue)
+				return fmt.Errorf("parsing %s as %s (AlsoBool): %w", internal.KeyErrorName(key), typeMetaM[Bool].name, ErrBoolAfterValue)
 			}
 
 			// TODO: broken asw, overwriting stuff
@@ -48,7 +49,7 @@ func (def *Definition) parseOptionContent(
 
 	err := def.parsed.opt.add(value)
 	if err != nil {
-		return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, typeMetaM[def.Type], ErrIncompatibleValue, err)
+		return fmt.Errorf("parsing %s as %s: %e: %w", internal.KeyErrorName(key), typeMetaM[def.Type], ErrIncompatibleValue, err)
 	}
 
 	def.parsed.found = true

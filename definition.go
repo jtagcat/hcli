@@ -1,13 +1,20 @@
 package harg
 
-type (
-	Definitions struct {
-		D       DefinitionMap
-		Aliases map[string]string // map[alias slug]defSlug
+import "fmt"
+
+func (defs Definitions) SetAlias(name string, to string) error {
+	defP, ok := defs[to]
+	if !ok {
+		return fmt.Errorf("definition name %s: %w", to, ErrOptionHasNoDefinition)
 	}
 
-	DefinitionMap map[string]Definition // map[slug]; 1-character: short option, >1: long option
-	Definition    struct {
+	defs[name] = defP
+	return nil
+}
+
+type (
+	Definitions map[string]*Definition // map[slug]; 1-character: short option, >1: long option
+	Definition  struct {
 		Type Type
 
 		// For short options (1-char length), true means it's always bool
@@ -18,7 +25,7 @@ type (
 		AlsoBool bool
 
 		// use Definition.Methods() to get data, #TODO:
-		parsed *parsedT
+		parsed parsedT
 	}
 	parsedT struct {
 		originalType Type // when AlsoBool
@@ -26,4 +33,3 @@ type (
 		opt          option
 	}
 )
-
