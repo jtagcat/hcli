@@ -21,7 +21,7 @@ func (def *Definition) IsBool() bool {
 // true: 1,
 // true true true: 3,
 func (def *Definition) Count() (v int, ok bool) {
-	if def.Type != Int || def.parsed.opt == nil {
+	if def.Type != Bool || def.parsed.opt == nil {
 		return
 	}
 
@@ -34,7 +34,7 @@ func (def *Definition) Count() (v int, ok bool) {
 
 func (def *Definition) SlBool() ([]bool, bool) {
 	// mismatched type or !def.Touched()
-	if def.Type != Int || def.parsed.opt == nil {
+	if def.Type != Bool || def.parsed.opt == nil {
 		return nil, false
 	}
 
@@ -57,7 +57,7 @@ func (o optString) contents() any {
 
 func (def *Definition) SlString() ([]string, bool) {
 	// mismatched type or !def.Touched()
-	if def.Type != Int || def.parsed.opt == nil {
+	if def.Type != String || def.parsed.opt == nil {
 		return nil, false
 	}
 
@@ -103,7 +103,7 @@ func (o *optInt64) contents() any {
 
 func (def *Definition) SlInt64() ([]int64, bool) {
 	// mismatched type or !def.Touched()
-	if def.Type != Int || def.parsed.opt == nil {
+	if def.Type != Int64 || def.parsed.opt == nil {
 		return nil, false
 	}
 
