@@ -1,9 +1,0 @@
-TODO: 
- - Merge options to definitions? Refactor, reduce panic and faultpoints.
- - get methods for AlsoBool differention, for general isOk/isSet
- - testing
- - better type enum validation (user sanitization)
- - code generation?
- - bash completions based on definitions
- - streamline/optimize errors
- - henv (harg with environment variables), urfave/cli@v3 implementation
