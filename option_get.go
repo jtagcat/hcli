@@ -14,17 +14,17 @@ func (def *Definition) Touched() bool {
 func (def *Definition) ok(needed Type) error {
 	meta, ok := typeMetaM[def.Type]
 	if !ok {
-		return fmt.Errorf("Definition.ok(): Type %s not found in typeMetaM: %w", typeMetaM[def.Type].name, ErrInternalBug)
+		return fmt.Errorf("Definition.ok(): Type %s not found in typeMetaM: %w", typeMetaM[def.Type].errName, ErrInternalBug)
 	}
 
 	if def.Type != needed { // not checking for needed Type to be in the map
-		return fmt.Errorf("method needs enum Type %s, is incompatible with %s: %w", typeMetaM[needed].name, typeMetaM[def.Type].name, ErrIncompatibleMethod)
+		return fmt.Errorf("method needs enum Type %s, is incompatible with %s: %w", typeMetaM[needed].errName, typeMetaM[def.Type].errName, ErrIncompatibleMethod)
 	}
 
 	got := reflect.TypeOf(def.parsed.opt).Elem().Name()
 	want := reflect.TypeOf(meta.emptyT).Elem().Name()
 	if got != want {
-		return fmt.Errorf("method for Type %s expected iface %s, is incompatible with parsed iface %s, %w", typeMetaM[def.Type].name, want, got, ErrIncompatibleMethod)
+		return fmt.Errorf("method for Type %s expected iface %s, is incompatible with parsed iface %s, %w", typeMetaM[def.Type].errName, want, got, ErrIncompatibleMethod)
 	}
 
 	return nil

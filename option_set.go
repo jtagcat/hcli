@@ -8,9 +8,10 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
+// def.Type = string
 func (def *Definition) parseOptionContent(
 	key string,
-	value string, // "" means literally empty, caller has already defaulted booleans to true
+	value string, // "" means literally empty, caller has already defaulted valueless booleans to true
 ) error { // errContext provided
 
 	if def.parsed.found { // TODO:
@@ -22,7 +23,7 @@ func (def *Definition) parseOptionContent(
 		err := boolFace.add(value)
 		if err == nil {
 			if def.parsed.found && def.Type != Bool { // we have already parsed opt with native type
-				return fmt.Errorf("parsing %s as %s (AlsoBool): %w", internal.KeyErrorName(key), typeMetaM[Bool].name, ErrBoolAfterValue)
+				return fmt.Errorf("parsing %s as %s (AlsoBool): %w", internal.KeyErrorName(key), typeMetaM[Bool].errName, ErrBoolAfterValue)
 			}
 
 			// TODO: broken asw, overwriting stuff
@@ -43,13 +44,15 @@ func (def *Definition) parseOptionContent(
 	}
 
 	// valueful
+
+	// initialize option interface
 	if !def.parsed.found {
 		def.parsed.opt = typeMetaM[def.Type].emptyT
 	}
 
 	err := def.parsed.opt.add(value)
 	if err != nil {
-		return fmt.Errorf("parsing %s as %s: %e: %w", internal.KeyErrorName(key), typeMetaM[def.Type], ErrIncompatibleValue, err)
+		return fmt.Errorf("parsing %s as %s: %w: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, ErrIncompatibleValue, err)
 	}
 
 	def.parsed.found = true
@@ -74,8 +77,8 @@ const (
 )
 
 var typeMetaM = map[Type]struct {
-	name   string
-	emptyT option
+	errName string
+	emptyT  option
 }{
 	Bool:     {"bool", &optBool{}},
 	String:   {"string", &optString{}},

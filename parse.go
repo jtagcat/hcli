@@ -11,8 +11,8 @@ import (
 var (
 	// end user (runtime) error
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
-	ErrBoolAfterValue        = errors.New("AlsoBool does not accept bools after value inputs") // --foo=value --foo --foo=value
-	ErrIncompatibleValue     = errors.New("")                                                  // TODO: strconv.Atoi("this is not a number")
+	ErrBoolAfterValue        = errors.New("AlsoBool does not accept booleans after valueful uses") // --foo=value --foo --foo=value
+	ErrIncompatibleValue     = errors.New("incompatible value")                                    // eg strconv.Atoi("this is not a number")
 
 	// library user (runtime) error (Definition.Foobar())
 	ErrIncompatibleMethod = errors.New("method not compatible with type")
