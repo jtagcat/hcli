@@ -65,6 +65,7 @@ type option interface {
 }
 
 type Type uint32 // enum:
+var typeMax = 7  //
 const (
 	Bool Type = iota
 	String

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode/utf8"
+
+	internal "github.com/jtagcat/harg/internal"
 )
 
 func (defs Definitions) SetAlias(name string, to string) error {
@@ -32,21 +34,24 @@ type (
 		parsed parsedT
 	}
 	parsedT struct {
-		originalType Type // when AlsoBool
-		found        bool
-		opt          option
+		found bool
+		opt   option
 	}
 )
 
-func (defs Definitions) normalize() {
+func (defs Definitions) normalize() error {
 	for name, def := range defs {
 		if def == nil {
 			delete(defs, name)
 			continue
 		}
 
+		if int(def.Type) > typeMax {
+			return fmt.Errorf("%s: %w", internal.KeyErrorName(name), ErrInvalidDefinition)
+		}
+
 		if def.Type == Bool && def.AlsoBool {
-			def.AlsoBool = false
+			def.AlsoBool = false // for parseOptionContent()
 		}
 
 		// short args are case sensitive, skip

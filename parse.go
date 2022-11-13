@@ -14,14 +14,11 @@ var (
 	ErrBoolAfterValue        = errors.New("AlsoBool does not accept booleans after valueful uses") // --foo=value --foo --foo=value
 	ErrIncompatibleValue     = errors.New("incompatible value")                                    // eg strconv.Atoi("this is not a number")
 
-	// library user (runtime) error (Definition.Foobar())
-	ErrIncompatibleMethod = errors.New("method not compatible with type")
+	// library user error (always returned on Parse())
+	ErrInvalidDefinition = errors.New("invalid definition")
 
-	// runtime error
+	// runtime error //TODO:
 	ErrInternalBug = errors.New("internal bug in harg or undefined enum") // anti-panic safetynet
-
-	// depends on definitions (Parse() always fails):
-	ErrSlugConflict = errors.New("conflicting same-named alias")
 )
 
 func (defs *Definitions) Parse(
@@ -44,7 +41,9 @@ func (defs *Definitions) Parse(
 ) {
 	args = args[1:] // remove program name //TODO: should this be external?
 
-	defs.normalize()
+	if err := defs.normalize(); err != nil {
+		return nil, nil, err
+	}
 	chokeM := internal.SliceLowercaseIndex(chokes)
 
 	var skipNext bool
