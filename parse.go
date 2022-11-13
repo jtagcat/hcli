@@ -24,6 +24,14 @@ type (
 		//   true: if "=" is not used, Type is changed to bool (or countable). Values are treated as bools, if strconv.ParseBool says so.
 		// If bool is encountered after value, ErrBoolAfterValue will be returned on parsing. Any bools before value flags will be ignored.
 		AlsoBool bool
+
+		// use Definition.Methods() to get data, #TODO:
+		parsed parsedT
+	}
+	parsedT struct {
+		parsed bool
+		found  bool
+		iface  optionX
 	}
 )
 
@@ -32,6 +40,9 @@ var (
 	ErrOptionHasNoDefinition = errors.New("option has no definition")
 	ErrBoolAfterValue        = errors.New("AlsoBool does not accept bools after value inputs") // --foo=value --foo --foo=value
 	ErrIncompatibleValue     = errors.New("")                                                  // TODO: strconv.Atoi("this is not a number")
+
+	// library user (runtime) error (Definition.Foobar())
+	ErrGetBeforeParsed = errors.New("tried to get parsed option value before it was parsed")
 
 	// runtime error
 	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet
@@ -49,16 +60,15 @@ func (defs *Definitions) Parse(
 	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke
 	// Chokes are not seen after "--", or in places of argument values ("--foo choke", "-f choke")
 ) (
-	_ OptionsMap, // parsed options
+	// parsed options get added to defs (method parent)
 	parsed []string, // non-options, arguments
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
 ) {
 	if err := defs.checkDefs(); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	chokeM := internal.SliceToLowercaseMap(chokes)
-	optM := make(OptionsMap)
 
 	var skipNext bool
 	for i, a := range args {
@@ -73,7 +83,7 @@ func (defs *Definitions) Parse(
 		switch argumentKind(&a) {
 		case e_argument:
 			if _, isChoke := chokeM[strings.ToLower(a)]; isChoke {
-				return optM, parsed, args[i:], nil
+				return parsed, args[i:], nil
 			}
 			parsed = append(parsed, a)
 
@@ -81,23 +91,23 @@ func (defs *Definitions) Parse(
 			if len(args)-1 != i { // there are more args
 				parsed = append(parsed, args[i+1:]...)
 			}
-			return optM, parsed, nil, nil
+			return parsed, nil, nil
 
 		case e_shortOption:
-			skipNext, err = defs.parseShortOption(&optM, &i, &args)
+			skipNext, err = defs.parseShortOption(&i, &args)
 			if err != nil {
-				return nil, nil, nil, err
+				return nil, nil, err
 			}
 
 		case e_longOption:
-			skipNext, err = defs.parseLongOption(&optM, &chokeM, &i, &args) // len(a) >= 3
+			skipNext, err = defs.parseLongOption(&i, &args) // len(a) >= 3
 			if err != nil {
-				return nil, nil, nil, err
+				return nil, nil, err
 			}
 		}
 
 	}
-	return optM, parsed, nil, nil
+	return parsed, nil, nil
 }
 
 func (defs *Definitions) checkDefs() error {

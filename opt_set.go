@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func (optM *OptionsMap) parseOptionContent(
+func (def *Definition) parseOptionContent(
 	originalKey string, // may be alias name or == effectiveKey
-	effectiveKey string, def *Definition,
+	effectiveKey string,
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
-	opt, nativeOK := (*optM)[effectiveKey]
+	opt, nativeOK := (*defM)[effectiveKey]
 
 	if def.AlsoBool {
 		boolOpt := typeEmptyM[e_bool]
@@ -22,7 +22,7 @@ func (optM *OptionsMap) parseOptionContent(
 				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, boolOpt.typeName(), ErrBoolAfterValue)
 			}
 
-			(*optM)[effectiveKey] = boolOpt
+			(*defM)[effectiveKey] = boolOpt
 		}
 
 		// err != nil
@@ -43,34 +43,17 @@ func (optM *OptionsMap) parseOptionContent(
 		return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
 	}
 
-	(*optM)[effectiveKey] = opt
+	(*defM)[effectiveKey] = opt
 	return nil
 }
 
-type (
-	OptionsMap map[string]option // parallel to Definitions.D
-	option     interface {
-		typeName() string
-		found(write bool) bool
-		contents() any           // resolved with option.Sl
-		add(rawOpt string) error // string: type name (to use in error)
-	}
-)
-
-type optCommon struct {
-	foundV bool
-}
-
-func (o *optCommon) found(write bool) bool {
-	if write {
-		o.foundV = true
-	}
-	return o.foundV
+type optionX interface {
+	contents() any           // resolved with option.Sl
+	add(rawOpt string) error // string: type name (to use in error)
 }
 
 type Type int // enum
-
-const ( // enum
+const (       // enum
 	e_bool Type = iota
 	// doesn't seem the best way, but let's try
 	e_string
@@ -82,22 +65,24 @@ const ( // enum
 	e_duration
 )
 
-var typeEmptyM = map[Type]option{
-	// e_bool is handled in parseOptionContent
-	e_string:   &optString{},
-	e_int:      &optInt{},
-	e_int64:    &optInt64{},
-	e_uint:     &optUint{},
-	e_uint64:   &optUint64{},
-	e_float64:  &optFloat64{},
-	e_duration: &optDuration{},
+var typeMetaM = map[Type]struct {
+	name   string
+	emptyT optionX
+}{
+	e_bool:     {"bool", &optBool{}},
+	e_string:   {"string", &optString{}},
+	e_int:      {"int", &optInt{}},
+	e_int64:    {"int64", &optInt64{}},
+	e_uint:     {"uint", &optUint{}},
+	e_uint64:   {"uint64", &optUint64{}},
+	e_float64:  {"float64", &optFloat64{}},
+	e_duration: {"duration", &optDuration{}},
 }
 
 // bool / count
 
 type (
 	optBool struct {
-		optCommon
 		value optBoolVal
 	}
 	optBoolVal struct {
@@ -105,10 +90,6 @@ type (
 		value []bool
 	}
 )
-
-func (o *optBool) typeName() string {
-	return "bool"
-}
 
 func (o *optBool) contents() any {
 	return o.value
@@ -133,12 +114,7 @@ func (o *optBool) add(s string) error {
 // string
 
 type optString struct {
-	optCommon
 	value []string
-}
-
-func (o *optString) typeName() string {
-	return "string"
 }
 
 func (o *optString) contents() any {
@@ -153,12 +129,7 @@ func (o *optString) add(s string) error {
 // int
 
 type optInt struct {
-	optCommon
 	value []int
-}
-
-func (o *optInt) typeName() string {
-	return "int"
 }
 
 func (o *optInt) contents() any {
@@ -178,12 +149,7 @@ func (o *optInt) add(s string) error {
 // int64
 
 type optInt64 struct {
-	optCommon
 	value []int64
-}
-
-func (o *optInt64) typeName() string {
-	return "int64"
 }
 
 func (o *optInt64) contents() any {
@@ -203,12 +169,7 @@ func (o *optInt64) add(s string) error {
 // uint
 
 type optUint struct {
-	optCommon
 	value []uint
-}
-
-func (o *optUint) typeName() string {
-	return "uint"
 }
 
 func (o *optUint) contents() any {
@@ -228,12 +189,7 @@ func (o *optUint) add(s string) error {
 // uint64
 
 type optUint64 struct {
-	optCommon
 	value []uint64
-}
-
-func (o *optUint64) typeName() string {
-	return "uint64"
 }
 
 func (o *optUint64) contents() any {
@@ -253,12 +209,7 @@ func (o *optUint64) add(s string) error {
 // float64
 
 type optFloat64 struct {
-	optCommon
 	value []float64
-}
-
-func (o *optFloat64) typeName() string {
-	return "float64"
 }
 
 func (o *optFloat64) contents() any {
@@ -278,12 +229,7 @@ func (o *optFloat64) add(s string) error {
 // duration
 
 type optDuration struct {
-	optCommon
 	value []time.Duration
-}
-
-func (o *optDuration) typeName() string {
-	return "duration"
 }
 
 func (o *optDuration) contents() any {

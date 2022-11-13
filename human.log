@@ -1,5 +1,6 @@
-TODO:
+TODO: 
  - Merge options to definitions? Refactor, reduce panic and faultpoints.
+ - get methods for AlsoBool differention, for general isOk/isSet
  - testing
  - code generation?
  - bash completions based on definitions

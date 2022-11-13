@@ -1,25 +1,42 @@
 package harg
 
-// stuff will panic on undefined slugs, expecting linter?
-
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 // Was there any option parsed matching the definition of slug
-func (optM *OptionsMap) Touched(slug string) bool {
-	if v, ok := (*optM)[slug]; ok {
-		return v.found(false)
+func (def *Definition) Touched(slug string) (bool, error) {
+	if def.parsed.parsed == false {
+		return false, ErrGetBeforeParsed
 	}
 
-	panic(fmt.Sprintf("harg.OptionsTypedMap.Touched(): slug %s does not exist (undefined option)", slug))
+	return def.parsed.found, nil
+}
+
+func (def *Definition) ok() error {
+	if def.parsed.parsed == false {
+		return ErrGetBeforeParsed
+	}
+
+	meta, ok := typeMetaM[def.Type]
+	if !ok {
+		return fmt.Errorf("Definition.ok(): Type %s not found in typeMetaM: %w", def.Type, ErrInternalBug)
+	}
+}
+
+func (pt *parsedT) ifaceName() string {
+	return reflect.TypeOf(pt.iface).
+		String()
 }
 
 // bool
 
-func (optM *OptionsMap) SlBool(slug string) []bool {
-	return (*optM)[slug].contents().(optBoolVal).value
+func (def *Definition) SlBool() ([]bool, error) {
+	return def.parsed.iface.contents().(optBoolVal).value, nil
 }
 
-func (optM *OptionsMap) Bool(slug string) bool {
+func (def *OptionsMap) Bool(slug string) bool {
 	sl := optM.SlBool(slug)
 	return sl[len(sl)-1] // last defined
 }
