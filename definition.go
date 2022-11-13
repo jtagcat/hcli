@@ -34,8 +34,7 @@ type (
 		parsed parsedT
 	}
 	parsedT struct {
-		found bool
-		opt   option
+		opt option
 	}
 )
 
@@ -66,4 +65,5 @@ func (defs Definitions) normalize() error {
 			delete(defs, name)
 		}
 	}
+	return nil
 }

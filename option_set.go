@@ -8,45 +8,33 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
-// def.Type = string
 func (def *Definition) parseOptionContent(
 	key string,
 	value string, // "" means literally empty, caller has already defaulted valueless booleans to true
 ) error { // errContext provided
+	// defs.normalize(): actual Type == Bool can never be AlsoBool
 
-	if def.parsed.found { // TODO:
-	}
+	var notAlsoBool bool
+	if def.AlsoBool &&
+		// try parsing as AlsoBool only when not already parsed as non-bool
+		(def.parsed.opt == nil || def.Type == Bool) {
 
-	if def.AlsoBool {
-		boolFace := typeMetaM[Bool].emptyT
+		if def.parsed.opt == nil {
+			def.parsed.opt = typeMetaM[Bool].emptyT
+		}
 
-		err := boolFace.add(value)
+		err := def.parsed.opt.add(value)
 		if err == nil {
-			if def.parsed.found && def.Type != Bool { // we have already parsed opt with native type
-				return fmt.Errorf("parsing %s as %s (AlsoBool): %w", internal.KeyErrorName(key), typeMetaM[Bool].errName, ErrBoolAfterValue)
-			}
-
-			// TODO: broken asw, overwriting stuff
-			def.parsed.originalType = def.Type
-			def.Type, def.parsed.found, def.parsed.opt = Bool, true, boolFace
+			def.Type = Bool
 			return nil
 		}
 
-		// we have parsed it as bool
-
-		// non-bool AlsoBool continues to switch
-		if def.parsed.found { // restore original
-			def.Type = def.parsed.originalType
-			if def.Type == Bool { // discard previous bools
-				def.parsed.found = false
-			}
-		}
+		notAlsoBool = true
+		// on err continue to parse normally:
 	}
 
-	// valueful
-
 	// initialize option interface
-	if !def.parsed.found {
+	if def.parsed.opt == nil || notAlsoBool {
 		def.parsed.opt = typeMetaM[def.Type].emptyT
 	}
 
@@ -55,7 +43,6 @@ func (def *Definition) parseOptionContent(
 		return fmt.Errorf("parsing %s as %s: %w: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, ErrIncompatibleValue, err)
 	}
 
-	def.parsed.found = true
 	return nil
 }
 
