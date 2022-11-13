@@ -1,42 +1,31 @@
-package harg
+package harg_test
 
 import (
 	"testing"
+
+	"github.com/jtagcat/harg"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestDefinitionNormalizeNilMap(t *testing.T) {
-	t.Parallel()
-
-	defs := Definitions{}
-
-	defs.normalize()
-
-	if _, ok := defs["test"]; ok {
-		t.Error("Definitions should be empty, but still usable")
+func TestSetAlias(t *testing.T) {
+	defsOriginal := harg.Definitions{
+		"foo": {
+			Type: harg.String,
+		},
 	}
-}
+	defs := defsOriginal
 
-func TestDefinitionNormalize(t *testing.T) {
-	t.Parallel()
+	assert.ErrorIs(t,
+		defs.SetAlias("alias", "invalid"),
+		harg.ErrOptionHasNoDefinition,
+	)
+	assert.Equal(t, defsOriginal, defs)
 
-	defs := Definitions{
-		"nil":       nil,
-		"Uppercase": &Definition{},
-		"lowercase": &Definition{},
-		"S":         &Definition{},
-		"s":         &Definition{},
-	}
-	defs.normalize()
+	//
 
-	for _, name := range []string{"test", "nil", "Uppercase"} {
-		if _, ok := defs[name]; ok {
-			t.Errorf("%s should not be in Definitions", name)
-		}
-	}
+	defs = defsOriginal
 
-	for _, name := range []string{"uppercase", "lowercase", "S", "s"} {
-		if _, ok := defs[name]; !ok {
-			t.Errorf("%s should be in Definitions", name)
-		}
-	}
+	assert.Nil(t,
+		defs.SetAlias("alias", "foo"))
+	assert.Equal(t, harg.String, defs["alias"].Type)
 }
