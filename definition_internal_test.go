@@ -21,9 +21,15 @@ func TestDefinitionNormalize(t *testing.T) {
 	t.Parallel()
 
 	defs := Definitions{
-		"nil":       nil,
-		"Uppercase": &Definition{},
-		"lowercase": &Definition{},
+		"nil": nil,
+		"Uppercase": &Definition{
+			Type:     String,
+			AlsoBool: true,
+		},
+		"lowercase": &Definition{
+			Type:     Bool,
+			AlsoBool: true,
+		},
 		"S": &Definition{
 			Type:     String,
 			AlsoBool: true,
@@ -50,11 +56,13 @@ func TestDefinitionNormalize(t *testing.T) {
 		}
 	}
 
-	if def := defs["S"]; def.AlsoBool == false {
-		t.Errorf("S AlsoBool should be true")
+	if def := defs["uppercase"]; def.AlsoBool == false {
+		t.Errorf("uppercase AlsoBool should be false")
 	}
-	if def := defs["s"]; def.AlsoBool == true {
-		t.Errorf("s AlsoBool should be false")
+	for _, name := range []string{"lowercase", "S", "s"} {
+		if def := defs[name]; def.AlsoBool == true {
+			t.Errorf("%s AlsoBool should be false", name)
+		}
 	}
 }
 

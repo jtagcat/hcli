@@ -55,6 +55,7 @@ func (defs Definitions) normalize() error {
 
 		// short args are case sensitive, skip
 		if utf8.RuneCountInString(name) == 1 {
+			def.AlsoBool = false
 			continue
 		}
 
