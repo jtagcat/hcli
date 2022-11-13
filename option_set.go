@@ -129,10 +129,6 @@ type optString struct {
 	value []string
 }
 
-func (o *optString) contents() any {
-	return o.value
-}
-
 func (o *optString) add(s string) error {
 	o.value = append(o.value, s)
 	return nil
@@ -142,10 +138,6 @@ func (o *optString) add(s string) error {
 
 type optInt struct {
 	value []int
-}
-
-func (o *optInt) contents() any {
-	return o.value
 }
 
 func (o *optInt) add(s string) error {
@@ -164,10 +156,6 @@ type optInt64 struct {
 	value []int64
 }
 
-func (o *optInt64) contents() any {
-	return o.value
-}
-
 func (o *optInt64) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, 64)
 	if err != nil {
@@ -182,10 +170,6 @@ func (o *optInt64) add(s string) error {
 
 type optUint struct {
 	value []uint
-}
-
-func (o *optUint) contents() any {
-	return o.value
 }
 
 func (o *optUint) add(s string) error {
@@ -204,10 +188,6 @@ type optUint64 struct {
 	value []uint64
 }
 
-func (o *optUint64) contents() any {
-	return o.value
-}
-
 func (o *optUint64) add(s string) error {
 	v, err := strconv.ParseInt(s, 0, 64)
 	if err != nil {
@@ -222,10 +202,6 @@ func (o *optUint64) add(s string) error {
 
 type optFloat64 struct {
 	value []float64
-}
-
-func (o *optFloat64) contents() any {
-	return o.value
 }
 
 func (o *optFloat64) add(s string) error {
@@ -244,10 +220,6 @@ type optDuration struct {
 	value []time.Duration
 }
 
-func (o *optDuration) contents() any {
-	return o.value
-}
-
 func (o *optDuration) add(s string) error {
 	v, err := time.ParseDuration(s)
 	if err != nil {
@@ -258,10 +230,11 @@ func (o *optDuration) add(s string) error {
 	return err
 }
 
+// TODO: more Types
+// add to: Types enum; option_set (2); option_get (3)
+//
 // timestamp
-// TODO:
-
 // ip
 // ipv4
 // ipv6
-// TODO:
+// ...?
