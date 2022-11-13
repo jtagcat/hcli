@@ -3,42 +3,49 @@ package harg
 import (
 	"fmt"
 	"reflect"
+	"time"
 )
 
 // Was there any option parsed matching the definition of slug
-func (def *Definition) Touched(slug string) (bool, error) {
-	if def.parsed.parsed == false {
-		return false, ErrGetBeforeParsed
-	}
-
-	return def.parsed.found, nil
+func (def *Definition) Touched() bool {
+	return def.parsed.found
 }
 
-func (def *Definition) ok() error {
-	if def.parsed.parsed == false {
-		return ErrGetBeforeParsed
-	}
-
+func (def *Definition) ok(needed Type) error {
 	meta, ok := typeMetaM[def.Type]
 	if !ok {
-		return fmt.Errorf("Definition.ok(): Type %s not found in typeMetaM: %w", def.Type, ErrInternalBug)
+		return fmt.Errorf("Definition.ok(): Type %s not found in typeMetaM: %w", typeMetaM[def.Type].name, ErrInternalBug)
 	}
-}
 
-func (pt *parsedT) ifaceName() string {
-	return reflect.TypeOf(pt.iface).
-		String()
+	if def.Type != needed { // not checking for needed Type to be in the map
+		return fmt.Errorf("method needs enum Type %s, is incompatible with %s: %w", typeMetaM[needed].name, typeMetaM[def.Type].name, ErrIncompatibleMethod)
+	}
+
+	got := reflect.TypeOf(def.parsed.iface).Elem().Name()
+	want := reflect.TypeOf(meta.emptyT).Elem().Name()
+	if got != want {
+		return fmt.Errorf("method for Type %s expected iface %s, is incompatible with parsed iface %s, %w", typeMetaM[def.Type].name, want, got, ErrIncompatibleMethod)
+	}
+
+	return nil
 }
 
 // bool
 
 func (def *Definition) SlBool() ([]bool, error) {
+	if err := def.ok(e_bool); err != nil {
+		return nil, fmt.Errorf("SlBool: %w", err)
+	}
+
 	return def.parsed.iface.contents().(optBoolVal).value, nil
 }
 
-func (def *OptionsMap) Bool(slug string) bool {
-	sl := optM.SlBool(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Bool() (bool, error) {
+	sl, err := def.SlBool()
+	if err != nil || len(sl) < 1 {
+		return false, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // count is equal to count of consequtive true bools counting from right
@@ -47,91 +54,135 @@ func (def *OptionsMap) Bool(slug string) bool {
 // true false: 0,
 // true: 1,
 // true true true: 3,
-func (optM *OptionsMap) Count(slug string) int {
-	return (*optM)[slug].contents().(optBoolVal).count
+func (def *Definition) Count() (int, error) {
+	if err := def.ok(e_bool); err != nil {
+		return 0, fmt.Errorf("Count: %w", err)
+	}
+	return def.parsed.iface.contents().(optBoolVal).count, nil
 }
 
 // AlsoBool
-func (optM *OptionsMap) IsBool(slug string) bool {
-	return false // TODO:
-	// return (*optM)[slug].contents().(optBoolVal).count
+func (def *Definition) IsBool() bool {
+	return def.Type == e_bool // type is changed to e_bool on parsing if
 }
 
 //// generatable ////
 
 // string
 
-func (optM *OptionsMap) SlString(slug string) []string {
-	return (*optM)[slug].contents().([]string)
+func (def *Definition) SlString() ([]string, error) {
+	if err := def.ok(e_string); err != nil {
+		return nil, fmt.Errorf("SlString: %w", err)
+	}
+	return def.parsed.iface.contents().([]string), nil
 }
 
-func (optM *OptionsMap) String(slug string) string {
-	sl := optM.SlString(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) String() (string, error) {
+	sl, err := def.SlString()
+	if err != nil || len(sl) < 1 {
+		return "", err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // int
 
-func (optM *OptionsMap) SlInt(slug string) []int {
-	return (*optM)[slug].contents().([]int)
+func (def *Definition) SlInt() ([]int, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlInt: %w", err)
+	}
+	return def.parsed.iface.contents().([]int), nil
 }
 
-func (optM *OptionsMap) Int(slug string) int {
-	sl := optM.SlInt(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Int() (int, error) {
+	sl, err := def.SlInt()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // int64
 
-func (optM *OptionsMap) SlInt64(slug string) []int64 {
-	return (*optM)[slug].contents().([]int64)
+func (def *Definition) SlInt64() ([]int64, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlInt64: %w", err)
+	}
+	return def.parsed.iface.contents().([]int64), nil
 }
 
-func (optM *OptionsMap) Int64(slug string) int64 {
-	sl := optM.SlInt64(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Int64() (int64, error) {
+	sl, err := def.SlInt64()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // uint
 
-func (optM *OptionsMap) SlUint(slug string) []uint {
-	return (*optM)[slug].contents().([]uint)
+func (def *Definition) SlUint() ([]uint, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlUint: %w", err)
+	}
+	return def.parsed.iface.contents().([]uint), nil
 }
 
-func (optM *OptionsMap) Uint(slug string) uint {
-	sl := optM.SlUint(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Uint() (uint, error) {
+	sl, err := def.SlUint()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // uint64
 
-func (optM *OptionsMap) SlUint64(slug string) []uint64 {
-	return (*optM)[slug].contents().([]uint64)
+func (def *Definition) SlUint64() ([]uint64, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlUint64: %w", err)
+	}
+	return def.parsed.iface.contents().([]uint64), nil
 }
 
-func (optM *OptionsMap) Uint64(slug string) uint64 {
-	sl := optM.SlUint64(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Uint64() (uint64, error) {
+	sl, err := def.SlUint64()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // float64
 
-func (optM *OptionsMap) SlFloat64(slug string) []float64 {
-	return (*optM)[slug].contents().([]float64)
+func (def *Definition) SlFloat64() ([]float64, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlFloat64: %w", err)
+	}
+	return def.parsed.iface.contents().([]float64), nil
 }
 
-func (optM *OptionsMap) Float64(slug string) float64 {
-	sl := optM.SlFloat64(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Float64() (float64, error) {
+	sl, err := def.SlFloat64()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }
 
 // duration
 
-func (optM *OptionsMap) SlDuration(slug string) []float64 {
-	return (*optM)[slug].contents().([]float64)
+func (def *Definition) SlDuration() ([]time.Duration, error) {
+	if err := def.ok(e_int); err != nil {
+		return nil, fmt.Errorf("SlDuration: %w", err)
+	}
+	return def.parsed.iface.contents().([]time.Duration), nil
 }
 
-func (optM *OptionsMap) Duration(slug string) float64 {
-	sl := optM.SlFloat64(slug)
-	return sl[len(sl)-1] // last defined
+func (def *Definition) Duration() (time.Duration, error) {
+	sl, err := def.SlDuration()
+	if err != nil || len(sl) < 1 {
+		return 0, err
+	}
+	return sl[len(sl)-1], nil // last defined
 }

@@ -11,43 +11,50 @@ func (def *Definition) parseOptionContent(
 	effectiveKey string,
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
-	opt, nativeOK := (*defM)[effectiveKey]
+
+	if def.parsed.found {
+	}
 
 	if def.AlsoBool {
-		boolOpt := typeEmptyM[e_bool]
+		boolFace := typeMetaM[e_bool].emptyT
 
-		err := boolOpt.add(value)
+		err := boolFace.add(value)
 		if err == nil {
-			if nativeOK { // we already have a native opt
-				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, boolOpt.typeName(), ErrBoolAfterValue)
+			if def.parsed.found && def.Type != e_bool { // we have already parsed opt with native type
+				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, typeMetaM[e_bool].name, ErrBoolAfterValue)
 			}
 
-			(*defM)[effectiveKey] = boolOpt
+			// TODO: broken asw, overwriting stuff
+			def.parsed.originalType = def.Type
+			def.Type, def.parsed.found, def.parsed.iface = e_bool, true, boolFace
+			return nil
 		}
 
-		// err != nil
-		if def.Type == e_bool {
-			return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, boolOpt.typeName(), ErrIncompatibleValue, err)
-		}
+		// we have parsed it as bool
 
-		// Valueful AlsoBool continues to switch
+		// non-bool AlsoBool continues to switch
+		if def.parsed.found { // restore original
+			def.Type = def.parsed.originalType
+			if def.Type == e_bool { // discard previous bools
+				def.parsed.found = false
+			}
+		}
 	}
 
 	// valueful
-	if !nativeOK {
-		opt = typeEmptyM[def.Type]
+	if !def.parsed.found {
+		def.parsed.iface = typeMetaM[def.Type].emptyT
 	}
 
-	err := opt.add(value)
+	err := def.parsed.iface.add(value)
 	if err != nil {
-		return fmt.Errorf("parsing option %s with definition %s: %e: %w", originalKey, effectiveKey, ErrIncompatibleValue, err)
+		return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, typeMetaM[def.Type], ErrIncompatibleValue, err)
 	}
 
-	(*defM)[effectiveKey] = opt
 	return nil
 }
 
-type optionX interface {
+type option interface {
 	contents() any           // resolved with option.Sl
 	add(rawOpt string) error // string: type name (to use in error)
 }
@@ -67,7 +74,7 @@ const (       // enum
 
 var typeMetaM = map[Type]struct {
 	name   string
-	emptyT optionX
+	emptyT option
 }{
 	e_bool:     {"bool", &optBool{}},
 	e_string:   {"string", &optString{}},

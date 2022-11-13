@@ -29,9 +29,9 @@ type (
 		parsed parsedT
 	}
 	parsedT struct {
-		parsed bool
-		found  bool
-		iface  optionX
+		originalType Type // for AlsoBool
+		found        bool
+		iface        option
 	}
 )
 
@@ -42,10 +42,10 @@ var (
 	ErrIncompatibleValue     = errors.New("")                                                  // TODO: strconv.Atoi("this is not a number")
 
 	// library user (runtime) error (Definition.Foobar())
-	ErrGetBeforeParsed = errors.New("tried to get parsed option value before it was parsed")
+	ErrIncompatibleMethod = errors.New("method not compatible with type")
 
 	// runtime error
-	ErrInternalBug = errors.New("internal bug in harg") // anti-panic safetynet
+	ErrInternalBug = errors.New("internal bug in harg or undefined enum") // anti-panic safetynet
 
 	// depends on definitions (Parse() always fails):
 	ErrSlugConflict = errors.New("conflicting same-named alias")
