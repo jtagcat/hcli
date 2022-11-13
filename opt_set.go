@@ -12,21 +12,21 @@ func (def *Definition) parseOptionContent(
 	value string, // "" means literally empty, caller has already defaulted booleans to true
 ) error { // errContext provided
 
-	if def.parsed.found {
+	if def.parsed.found { // TODO:
 	}
 
 	if def.AlsoBool {
-		boolFace := typeMetaM[e_bool].emptyT
+		boolFace := typeMetaM[Bool].emptyT
 
 		err := boolFace.add(value)
 		if err == nil {
-			if def.parsed.found && def.Type != e_bool { // we have already parsed opt with native type
-				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, typeMetaM[e_bool].name, ErrBoolAfterValue)
+			if def.parsed.found && def.Type != Bool { // we have already parsed opt with native type
+				return fmt.Errorf("parsing option %s with definition %s as %s (AlsoBool): %w", originalKey, effectiveKey, typeMetaM[Bool].name, ErrBoolAfterValue)
 			}
 
 			// TODO: broken asw, overwriting stuff
 			def.parsed.originalType = def.Type
-			def.Type, def.parsed.found, def.parsed.iface = e_bool, true, boolFace
+			def.Type, def.parsed.found, def.parsed.iface = Bool, true, boolFace
 			return nil
 		}
 
@@ -35,7 +35,7 @@ func (def *Definition) parseOptionContent(
 		// non-bool AlsoBool continues to switch
 		if def.parsed.found { // restore original
 			def.Type = def.parsed.originalType
-			if def.Type == e_bool { // discard previous bools
+			if def.Type == Bool { // discard previous bools
 				def.parsed.found = false
 			}
 		}
@@ -51,6 +51,7 @@ func (def *Definition) parseOptionContent(
 		return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, typeMetaM[def.Type], ErrIncompatibleValue, err)
 	}
 
+	def.parsed.found = true
 	return nil
 }
 
