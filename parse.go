@@ -25,13 +25,17 @@ var (
 )
 
 func (defs *Definitions) Parse(
-	// [^chokes]: Chokes allow for global-local-whatever argument definitions by using Parse() multiple times.
-	// args: "--foo", "bar", "chokename", "--foo", "differentDef"
-	//          ^ parsed ^    ^choke, chokeReturn: "chokename", "--foo", "differentDef"
-
 	args []string, // usually os.Args
-	chokes []string, //[^chokes]// [case insensitive] parse arguments until first choke
-	// Chokes are not seen after "--", or in places of argument values ("--foo choke", "-f choke")
+
+	chokes []string, // [case insensitive]
+	// Chokes allow for global-local-whatever argument definitions by using Parse() multiple times:
+	//
+	// Parse() parses until first choke:
+	// args: "--foo", "bar", "chokename", "--foo", "differentDef"
+	//         ^ parsed ^     ^ choke ^
+	//                        chokeReturn: "chokename", "--foo", "differentDef"
+	//
+	// Chokes are not seen after "--", or in argument values ("--foo choke", "-f choke")
 ) (
 	// parsed options get added to defs (method parent)
 	parsed []string, // non-options, arguments
@@ -41,8 +45,7 @@ func (defs *Definitions) Parse(
 	args = args[1:] // remove program name //TODO: should this be external?
 
 	defs.normalize()
-
-	chokeM := internal.SliceToLowercaseMap(chokes)
+	chokeM := internal.SliceLowercaseIndex(chokes)
 
 	var skipNext bool
 	for i, a := range args {
@@ -81,6 +84,7 @@ func (defs *Definitions) Parse(
 		}
 
 	}
+
 	return parsed, nil, nil
 }
 
