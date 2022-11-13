@@ -26,7 +26,7 @@ func (def *Definition) parseOptionContent(
 
 			// TODO: broken asw, overwriting stuff
 			def.parsed.originalType = def.Type
-			def.Type, def.parsed.found, def.parsed.iface = Bool, true, boolFace
+			def.Type, def.parsed.found, def.parsed.opt = Bool, true, boolFace
 			return nil
 		}
 
@@ -43,10 +43,10 @@ func (def *Definition) parseOptionContent(
 
 	// valueful
 	if !def.parsed.found {
-		def.parsed.iface = typeMetaM[def.Type].emptyT
+		def.parsed.opt = typeMetaM[def.Type].emptyT
 	}
 
-	err := def.parsed.iface.add(value)
+	err := def.parsed.opt.add(value)
 	if err != nil {
 		return fmt.Errorf("parsing option %s with definition %s as %s: %e: %w", originalKey, effectiveKey, typeMetaM[def.Type], ErrIncompatibleValue, err)
 	}
