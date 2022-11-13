@@ -65,9 +65,11 @@ func (defs *Definitions) Parse(
 			parsed = append(parsed, a)
 
 		case argumentDivider:
-			if len(args)-1 != i { // there are more args
+			// append remaining args
+			if len(args)-1 != i {
 				parsed = append(parsed, args[i+1:]...)
 			}
+
 			return parsed, nil, nil
 
 		case shortOption:
