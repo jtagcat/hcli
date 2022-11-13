@@ -33,7 +33,7 @@ func (defs *Definitions) parseLongOption(i *int, args *[]string) (consumedNext b
 	if !valueFound && len(*args)-1 > *i {
 		lookArg := (*args)[*i+1]
 
-		consumedNext = argumentKind(&lookArg) == e_argument
+		consumedNext = argumentKind(&lookArg) == argument
 		if consumedNext {
 			value = lookArg
 		}
@@ -94,7 +94,7 @@ func (defs *Definitions) parseShortOption(argI *int, args *[]string) (nextWasCon
 			if len(*args)-1 > *argI { // there are more args
 				lookArg := (*args)[*argI+1]
 
-				valueFound := argumentKind(&lookArg) == e_argument
+				valueFound := argumentKind(&lookArg) == argument
 				if valueFound {
 					nextWasConsumed, value = true, lookArg
 				}

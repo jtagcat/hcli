@@ -61,11 +61,9 @@ type option interface {
 	add(rawOpt string) error // string: type name (to use in error)
 }
 
-type Type uint32 // enum
-
-const ( // enum
+type Type uint32 // enum:
+const (
 	Bool Type = iota
-	// doesn't seem the best way, but let's try
 	String
 	Int
 	Int64

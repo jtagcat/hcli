@@ -58,25 +58,25 @@ func (defs *Definitions) Parse(
 		}
 
 		switch argumentKind(&a) {
-		case e_argument:
+		case argument:
 			if _, isChoke := chokeM[strings.ToLower(a)]; isChoke {
 				return parsed, args[i:], nil
 			}
 			parsed = append(parsed, a)
 
-		case e_argumentDivider:
+		case argumentDivider:
 			if len(args)-1 != i { // there are more args
 				parsed = append(parsed, args[i+1:]...)
 			}
 			return parsed, nil, nil
 
-		case e_shortOption:
+		case shortOption:
 			skipNext, err = defs.parseShortOption(&i, &args)
 			if err != nil {
 				return nil, nil, err
 			}
 
-		case e_longOption:
+		case longOption:
 			skipNext, err = defs.parseLongOption(&i, &args) // len(a) >= 3
 			if err != nil {
 				return nil, nil, err
@@ -88,32 +88,31 @@ func (defs *Definitions) Parse(
 	return parsed, nil, nil
 }
 
-type argumentKindT int
-
-const ( // enum
-	e_argument        argumentKindT = iota
-	e_argumentDivider               // "--"
-	e_shortOption                   // "-something"
-	e_longOption                    // "--something", len() >= 3
+type argumentKindT uint32 // enum:
+const (
+	argument        argumentKindT = iota
+	argumentDivider               // "--"
+	shortOption                   // "-something"
+	longOption                    // "--something", len() >= 3
 )
 
 func argumentKind(arg *string) argumentKindT {
 	if len(*arg) < 2 || !strings.HasPrefix(*arg, "-") {
-		return e_argument // including "", "-"
+		return argument // including "", "-"
 	}
 
 	// "-x"
 	if !strings.HasPrefix((*arg)[1:], "-") {
-		return e_shortOption
+		return shortOption
 	}
 
 	// begins with "--"
 	switch utf8.RuneCountInString(*arg) {
 	case 2: // "--"
-		return e_argumentDivider
+		return argumentDivider
 	case 3: // "--x", single negative short
-		return e_shortOption
+		return shortOption
 	default: // > 3
-		return e_longOption
+		return longOption
 	}
 }
