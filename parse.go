@@ -65,6 +65,8 @@ func (defs *Definitions) Parse(
 	chokeReturn []string, //[^chokes]//  args[chokePos:], [0] is the found choke, [1:] are remaining unparsed args
 	err error, // see above var(); errContext not provided: use fmt.Errorf("parsing arguments: %w", err)
 ) {
+	args = args[1:] // remove program name TODO: should this be external?
+
 	if err := defs.checkDefs(); err != nil {
 		return nil, nil, err
 	}
@@ -137,7 +139,7 @@ func argumentKind(arg *string) argumentKindT {
 	}
 
 	// "-x"
-	if strings.HasPrefix((*arg)[1:], "-") {
+	if !strings.HasPrefix((*arg)[1:], "-") {
 		return e_shortOption
 	}
 
