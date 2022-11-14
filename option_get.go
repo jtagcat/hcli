@@ -4,22 +4,24 @@ import (
 	"time"
 )
 
-// Was there any option parsed matching the definition
+// Whether there was any option parsed matching the definition.
 func (def *Definition) Touched() bool {
 	return def.parsed != nil
 }
 
-// Was AlsoBool's type was changed to Bool on parsing
+// Whether AlsoBool's type was changed to Bool on parsing.
 func (def *Definition) IsBool() bool {
 	return def.Type == Bool
 }
 
-// count is equal to the count of consecutive true values read from right/last
+// Count of consecutive true values read from right/last
 //
-// true false true true: 2,
-// true false: 0,
-// true: 1,
-// true true true: 3,
+// Examples:
+//
+//	true false true true: 2
+//	true false: 0
+//	true: 1
+//	true true true: 3
 func (def *Definition) Count() (v int, ok bool) {
 	if def.Type != Bool || def.parsed == nil {
 		return

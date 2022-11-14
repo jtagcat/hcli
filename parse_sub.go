@@ -89,20 +89,20 @@ func (defs *Definitions) parseShortOption(first int, args []string) (nextWasCons
 		if len(argRune)-1 == optI {
 			// value in same arg
 			value = string(argRune[optI+1:])
-		} else {
-			// no value, space reached, try to lookahead (args: "-o", "value")
-			if len(args)-1 > first { // there are more args
-				lookArg := args[first+1]
+			//
+		} else if len(args)-1 > first {
+			// there are more args
+			lookArg := args[first+1]
 
-				valueFound := argumentKind(&lookArg) == argument
-				if valueFound {
-					nextWasConsumed, value = true, lookArg
-				}
+			valueFound := argumentKind(&lookArg) == argument
+			if valueFound {
+				nextWasConsumed, value = true, lookArg
 			}
 		}
-		return true, def.parseOptionContent(key, value)
 
+		return true, def.parseOptionContent(key, value)
 	}
+
 	return false, nil
 }
 

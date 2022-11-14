@@ -8,7 +8,7 @@ Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-
 
 ## Left to do:
 - Finish writing specification tests in [parse_test.go](parse_test.go).
-- Review codebase errors, flow clarity, and overall.
+- Review codebase errors, flow clarity, and overall; `golangci-all`
 - Example use for pkg.go.dev / README.md.
 - `strconv` says `t` and `f` are bools, and `y`, `n`, `yes`, `no` aren't. Are they?
 
@@ -20,5 +20,3 @@ Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-
 - Definition-based shell completions
 - `hyaml`: `yaml`?
 - ~~Code generation?~~
-
-Any [sponsors](github.com/sponsors/jtagcat/) appreciated!

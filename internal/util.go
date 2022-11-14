@@ -7,12 +7,13 @@ import (
 )
 
 func SliceLowercaseIndex(s []string) map[string]struct{} {
-	m := make(map[string]struct{})
+	index := make(map[string]struct{})
 
 	for _, str := range s {
-		m[strings.ToLower(str)] = struct{}{}
+		index[strings.ToLower(str)] = struct{}{}
 	}
-	return m
+
+	return index
 }
 
 func LowercaseLongKey(key string) string {
