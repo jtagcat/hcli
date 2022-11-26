@@ -111,7 +111,7 @@ func TestParseLongOptEat(t *testing.T) {
 
 	sl, ok := defs[oneKey].SlString()
 	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"-t", "world"}, sl)
+	assert.Equal(t, []string{"-t", "", "world"}, sl)
 
 	assert.Equal(t, false, defs[twoKey].Default())
 	assert.Equal(t, true, defs[fooKey].Default())
