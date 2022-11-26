@@ -45,7 +45,7 @@
 ### Additions compared to GNU:
 Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html, the following has been added:
 
-- def.Slice: (`--foo bar --foo baz` foo:{`bar`,`baz`})
+- def.Sl(): (`--foo bar --foo baz` foo:{`bar`,`baz`})
 - Space seperator (lookahead) in long options.
     - `AlsoBool`: Disallows space seperator, allows mixed bool (`--foo`) and valueful (`--foo=value`) definitions.
 - Negative short options: adding `-` before a short option means `false`.
