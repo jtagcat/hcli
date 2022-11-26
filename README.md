@@ -6,7 +6,7 @@ GNU-compatible feature-complete local-scoped Go argument parsing. See [`FORMAT.m
 
 ***
 
-The name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-friendly arguments' and 'harrrggghh!' 🏴‍☠️, finally something splendid for Go arguments!
+`harg` be a play on [git.meatballhat.com/x/argh](https://git.meatballhat.com/x/argh)! And more! Be fer 'human-friendly arguments' and 'harrrggghh'! Finally somethin' splendid fer do' Go arguments! 🏴‍☠️
 
 ## Next up:
 - henv: Environment variables
