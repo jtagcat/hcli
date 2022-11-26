@@ -1,14 +1,17 @@
 package harg
 
 import (
+	"errors"
 	"fmt"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	internal "github.com/jtagcat/harg/internal"
 )
 
 type (
+	// must not start with a decimal digit (0,1,2,3,4,5,6,7,8,9) (for ergonomic negative values)
 	Definitions map[string]*Definition // map[slug]; 1-character: short option, >1: long option
 	Definition  struct {
 		Type Type
@@ -37,13 +40,21 @@ func (defs Definitions) Alias(name string, target string) error {
 
 func (defs Definitions) normalize() error {
 	for name, def := range defs {
-		if def == nil {
+		if def == nil || name == "" {
 			delete(defs, name)
 			continue
 		}
 
 		if def.Type > typeMax {
-			return fmt.Errorf("%s: %w", internal.KeyErrorName(name), ErrInvalidDefinition)
+			return fmt.Errorf("%s: %w", internal.KeyErrorName(name), internal.GenericErr{
+				Err: ErrInvalidDefinition, Wrapped: errors.New("Type does not exist"),
+			})
+		}
+
+		if unicode.IsDigit(rune(name[0])) {
+			return fmt.Errorf("%s: %w", internal.KeyErrorName(name), internal.GenericErr{
+				Err: ErrInvalidDefinition, Wrapped: errors.New("Definition name can't start with a digit"),
+			})
 		}
 
 		if def.Type == Bool && def.AlsoBool {

@@ -20,6 +20,7 @@
         - Given multiple mixed bool/value options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
     - Prefix `---` for booleans negates it. [^TestParseShortBoolOpt], [^TestParseLongOptAlsoBool], [^TestParseError]
 - Prefix `-` means short options follow.
+    - Short option keys can't start with a digit (0..9) (for ergonomics).
     - Short options are 1 utf8 character, case sensitive. [^TestParseShortOptEat]
     - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`) [^TestParseShortBoolOpt], [^TestParseCount]
     - Preceeding `-` negates the following bool, otherwise ignored. (`--a` a:`false`; `-a-bc` a:`true` b:`false` c:`true`) [^TestParseShortBoolOpt], [^TestParseCount]

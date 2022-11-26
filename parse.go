@@ -107,6 +107,10 @@ func argumentKind(arg string) argumentKindT {
 		return argument // including "", "-"
 	}
 
+	if unicode.IsDigit(rune(arg[1])) {
+		return argument
+	}
+
 	// "-x"
 	if !strings.HasPrefix(arg[1:], "-") {
 		return shortOption // len(a) > 1 or parseShortOption panics
