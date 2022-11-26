@@ -171,6 +171,7 @@ func TestParseShortBoolOpt(t *testing.T) {
 		"-か-õx":   {true, false, true},
 		"-か-õ-x":  {true, false, false},
 		"--õx":    {true, false, false},
+		"---õx":   {false, false, false},
 	} {
 		defs := defs
 
@@ -246,6 +247,7 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 
 	args, chokeReturn, err := defs.Parse(
 		[]string{
+			"---foo", "bar", // false
 			"--foo bar",  // true
 			"--bar=true", // "true", not true
 		}, nil,
@@ -253,15 +255,15 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"bar", "world"}, args)
+	assert.Equal(t, []string{"bar", "bar"}, args)
 
-	sl, ok := defs[oneKey].SlString()
+	sl, ok := defs[oneKey].SlBool()
 	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"one", "two"}, sl)
+	assert.Equal(t, []bool{false, true}, sl)
 
 	s, ok := defs[oneKey].String()
 	assert.Equal(t, true, ok)
-	assert.Equal(t, "two", s)
+	assert.Equal(t, "true", s)
 
 	// - AlsoBool treats a valueless valueful option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
 	// - Values are always parsed as values. (`--foo=true` is string `true`, not value true) [^TestParseLongOptAlsoBool]
@@ -270,4 +272,46 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 	// TODO: waiting for feedback
 
 	t.Fatal("not implemented")
+}
+
+func TestParseError(t *testing.T) {
+	t.Parallel()
+
+	one, two, three := "str", "bool", "alsobool"
+
+	defs := harg.Definitions{
+		one:   {Type: harg.String},
+		two:   {},
+		three: {Type: harg.String, AlsoBool: true},
+	}
+
+	for _, test := range []errTest{
+		// Negative long option
+		{in: []string{"---str"}, errIs: harg.ErrIncompatibleValue},       // not bool
+		{in: []string{"---bool=true"}, errIs: harg.ErrIncompatibleValue}, // bool with value
+
+		// AlsoBool after Value
+		{in: []string{"--alsobool=val --alsobool"}, errIs: harg.ErrIncompatibleValue},
+
+		// No definition
+		{in: []string{"--nodef"}, errIs: harg.ErrOptionHasNoDefinition},
+		{in: []string{"-n"}, errIs: harg.ErrOptionHasNoDefinition},
+
+		// Some errors are tested in definition tests.
+	} {
+		defs := defs
+
+		args, chokeReturn, err := defs.Parse(
+			test.in, nil,
+		)
+
+		assert.ErrorIs(t, err, test.errIs)
+		assert.Nil(t, chokeReturn)
+		assert.Nil(t, args)
+	}
+}
+
+type errTest struct {
+	in    []string
+	errIs error
 }

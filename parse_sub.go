@@ -27,11 +27,19 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 		return false, err
 	}
 
-	if negateBool && !(def.Type == Bool || def.AlsoBool) {
-		return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
-			Err:     ErrIncompatibleValue,
-			Wrapped: errors.New("only Bool definitions can use negative prefix '---'"),
-		})
+	if negateBool {
+		if !(def.Type == Bool || def.AlsoBool) {
+			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+				Err:     ErrIncompatibleValue,
+				Wrapped: errors.New("only Bool option definitions can use negative prefix '---'"),
+			})
+		}
+		if valueFound {
+			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+				Err:     ErrIncompatibleValue,
+				Wrapped: errors.New("negative prefix '---' can't have any value (---option=value)"),
+			})
+		}
 	}
 
 	// bool has no lookahead, default = true
