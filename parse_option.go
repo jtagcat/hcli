@@ -51,7 +51,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 		consumedNext, value = lookAheadValue(args[1])
 	}
 
-	return consumedNext, def.parseOptionContent(key, value)
+	return consumedNext, def.parseOptionValue(key, value)
 }
 
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
@@ -106,7 +106,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 			value = strings.TrimPrefix(value, "=")
 		}
 
-		return consumedNext, def.parseOptionContent(key, value)
+		return consumedNext, def.parseOptionValue(key, value)
 	}
 
 	return false, nil

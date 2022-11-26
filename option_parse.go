@@ -7,7 +7,7 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
-func (def *Definition) parseOptionContent(key, value string) error { // errContext provided
+func (def *Definition) parseOptionValue(key, value string) error { // errContext provided
 	// restore
 	if def.AlsoBool && def.originalType != Bool {
 		def.parsed, def.Type = nil, def.originalType
