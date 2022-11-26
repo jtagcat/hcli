@@ -11,10 +11,10 @@ import (
 // (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
-func (defs *Definitions) parseLongOption(first int, args []string) (consumedNext bool, _ error) {
-	argName := args[first][2:] // [2:]: remove suffix "--"
+func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ error) {
+	argName := args[0][2:] // [2:]: remove suffix "--"
 	if argName == "" {
-		panic(fmt.Sprintf("parseLongOption caller did not ensure len(args[i]) > 2 for %d in %q", first, args))
+		panic("parseLongOption caller did not ensure len(args[0]) > 2")
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
@@ -30,13 +30,8 @@ func (defs *Definitions) parseLongOption(first int, args []string) (consumedNext
 	}
 
 	// try to lookahead value (args: "--key", "value")
-	if !valueFound && len(args)-1 > first {
-		lookArg := args[first+1]
-
-		consumedNext = argumentKind(&lookArg) == argument
-		if consumedNext {
-			value = lookArg
-		}
+	if !valueFound && len(args) > 1 {
+		consumedNext, value = lookAheadValue(args[1])
 	}
 
 	return consumedNext, def.parseOptionContent(key, value)
@@ -45,10 +40,10 @@ func (defs *Definitions) parseLongOption(first int, args []string) (consumedNext
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
 //
 // caller should ensure len(args[i]) >= 2; and defs.checkDefs()
-func (defs *Definitions) parseShortOption(first int, args []string) (nextWasConsumed bool, _ error) {
-	argRune := []rune(args[first][1:]) // [1:]: skip 0th "-"
+func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ error) {
+	argRune := []rune(args[0][1:]) // [1:]: skip 0th "-"
 	if len(argRune) == 0 {
-		panic(fmt.Sprintf("parseShort caller did not ensure len(args[i]) > 1 for %d in %q", first, args))
+		panic("parseShortOption caller did not ensure len(args[0]) > 1")
 	}
 
 	var negateNext bool
@@ -89,21 +84,22 @@ func (defs *Definitions) parseShortOption(first int, args []string) (nextWasCons
 		if len(argRune)-1 == optI {
 			// value in same arg
 			value = string(argRune[optI+1:])
-			//
-		} else if len(args)-1 > first {
-			// there are more args
-			lookArg := args[first+1]
-
-			valueFound := argumentKind(&lookArg) == argument
-			if valueFound {
-				nextWasConsumed, value = true, lookArg
-			}
+		} else if len(args) > 1 { // try to lookahead value (args: "--key", "value")
+			consumedNext, value = lookAheadValue(args[1])
 		}
 
 		return true, def.parseOptionContent(key, value)
 	}
 
 	return false, nil
+}
+
+func lookAheadValue(nextArg string) (consumedNext bool, value string) {
+	if argumentKind(nextArg) != argument {
+		return false, ""
+	}
+
+	return true, nextArg
 }
 
 func (defs Definitions) get(key string) (*Definition, error) {

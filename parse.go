@@ -37,49 +37,58 @@ func (defs *Definitions) Parse(
 	chokeReturn []string, // See above
 	err error, // see above var() for possible errors
 ) {
+	if len(args) == 0 {
+		return nil, nil, nil
+	}
+
 	if err := defs.normalize(); err != nil {
 		return nil, nil, err
 	}
 	chokeM := internal.SliceLowercaseIndex(chokes)
 
-	var skipNext bool
-	for i, a := range args {
+	for {
+		var skipNext bool
 
-		if skipNext {
-			// (current) i is "next", signal to skip
-			// as i-1 already parsed i as it's value
-			skipNext = false
-			continue
-		}
-
-		switch argumentKind(&a) {
+		switch argumentKind(args[0]) {
 		case argument:
-			if _, isChoke := chokeM[strings.ToLower(a)]; isChoke {
-				return parsed, args[i:], nil
+			if _, isChoke := chokeM[strings.ToLower(args[0])]; isChoke {
+				return parsed, args, nil
 			}
-			parsed = append(parsed, a)
+
+			parsed = append(parsed, args[0])
 
 		case argumentDivider:
-			// append remaining args
-			if len(args)-1 != i {
-				parsed = append(parsed, args[i+1:]...)
-			}
+			parsed = append(parsed, args[1:]...)
 
 			return parsed, nil, nil
 
 		case shortOption:
-			skipNext, err = defs.parseShortOption(i, args) // len(a) > 1 or parseShortOption panics
+			skipNext, err = defs.parseShortOption(args) // len(a) > 1 or parseShortOption panics
 			if err != nil {
 				return nil, nil, err
 			}
 
 		case longOption:
-			skipNext, err = defs.parseLongOption(i, args) // len(a) > 2 or parseLongOption panics
+			skipNext, err = defs.parseLongOption(args) // len(a) > 2 or parseLongOption panics
 			if err != nil {
 				return nil, nil, err
 			}
 		}
 
+		if len(args) == 1 {
+			break
+		}
+
+		if skipNext {
+			if len(args) == 2 {
+				break
+			}
+
+			args = args[2:]
+			continue
+		}
+
+		args = args[1:]
 	}
 
 	return parsed, nil, nil
@@ -93,18 +102,18 @@ const (
 	longOption                    // "--something", len() >= 3
 )
 
-func argumentKind(arg *string) argumentKindT {
-	if len(*arg) < 2 || !strings.HasPrefix(*arg, "-") {
+func argumentKind(arg string) argumentKindT {
+	if len(arg) < 2 || !strings.HasPrefix(arg, "-") {
 		return argument // including "", "-"
 	}
 
 	// "-x"
-	if !strings.HasPrefix((*arg)[1:], "-") {
+	if !strings.HasPrefix(arg[1:], "-") {
 		return shortOption // len(a) > 1 or parseShortOption panics
 	}
 
 	// begins with "--"
-	switch utf8.RuneCountInString(*arg) {
+	switch utf8.RuneCountInString(arg) {
 	case 2: // "--"
 		return argumentDivider
 	case 3: // "--x", single negative short
