@@ -267,6 +267,7 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 	// - Values are always parsed as values. (`--foo=true` is string `true`, not value true) [^TestParseLongOptAlsoBool]
 	// TODO: rework ^
 	//     - Given multiple mixed bool/value same-slug options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
+	// TODO: waiting for feedback
 
 	t.Fatal("not implemented")
 }

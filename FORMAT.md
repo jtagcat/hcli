@@ -13,10 +13,11 @@
     - `=` is a single delimiter in specifying values. (`--foo=bar`; `--foo=false`) [^TestAliasParse]
     - A space may be used to specify values for non-bool types. (`--foo bar`) [^TestAliasParse]
       - Values that could be parsed as option keys (`--foo --baz`) are parsed as keys (2 empty), not as values (foo:`--bar`). [^TestParseLongOptEat]
-    - `AlsoBool` treats a valueless valueful option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
+    - `AlsoBool` treats a valueless option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
         - Space-seperated syntax is unavailable. (invalid:`--foo value`) [^TestParseLongOptAlsoBool]
-        - Bools in values are parsed as booleans. (`--foo=true` is bool, not string "true") [^TestParseLongOptAlsoBool]
-        - Given multiple mixed bool/value options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
+        - Values are always parsed as values. (`--foo=true` is string `true`, not value true) [^TestParseLongOptAlsoBool]
+        - Given multiple mixed bool/value options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool], [^RFC]
+    - Prefix `---` for booleans negates it. [^RFC]
 - Prefix `-` means short options follow.
     - Short options are 1 utf8 character, case sensitive. [^TestParseShortOptEat]
     - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`) [^TestParseShortBoolOpt], [^TestParseCount]
@@ -40,6 +41,20 @@
 [^TestParseShortBoolOpt]: Tested by `TestParseShortBoolOpt()`
 [^TestDefinitionNormalize]: Tested by `TestDefinitionNormalize()`
 [^TestParseCount]: Tested by `TestParseCount()`
+[^RFC]: Requesting for comments
+
+### Requesting for comments
+`foo` is of type string and boolean.
+
+example 1: `--foo --foo=hello`
+example 2: `--foo=hello --foo`
+
+What logic should be used?
+ - a: Non-boolean wins ("hello", error)
+ - b: Non-boolean wins ("hello", "hello")
+ - c: Bools and strings may not be present at the same time (error, error)
+ - d: First set type wins (true, "hello")
+ - e: Last set type wins ("hello", true)
 
 ### Additions compared to GNU:
 Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html, the following has been added:
