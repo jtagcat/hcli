@@ -111,8 +111,8 @@ func TestParseLongOptEat(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, []string{"-t", "", "world"}, sl)
 
-	assert.Equal(t, false, defs[twoKey].Default())
-	assert.Equal(t, true, defs[fooKey].Default())
+	assert.Equal(t, true, defs[twoKey].Default())
+	assert.Equal(t, false, defs[fooKey].Default())
 }
 
 func TestParseShortOptEat(t *testing.T) {
@@ -146,8 +146,8 @@ func TestParseShortOptEat(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, []string{"t", "-t", "=-t", "", "world"}, sl)
 
-	assert.Equal(t, false, defs[twoKey].Default())
-	assert.Equal(t, true, defs[fooKey].Default())
+	assert.Equal(t, true, defs[twoKey].Default())
+	assert.Equal(t, false, defs[fooKey].Default())
 }
 
 func TestParseShortBoolOpt(t *testing.T) {
@@ -184,7 +184,7 @@ func TestParseShortBoolOpt(t *testing.T) {
 		assert.Nil(t, args)
 
 		set := defs[unsetKey].Default()
-		assert.Equal(t, false, set)
+		assert.Equal(t, true, set)
 
 		b, ok := defs[zeroKey].Bool()
 		assert.Equal(t, true, ok)
