@@ -84,6 +84,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		if len(argRune)-1 == optI {
 			// value in same arg
 			value = string(argRune[optI+1:])
+			value = strings.TrimPrefix(value, "=")
 		} else if len(args) > 1 { // try to lookahead value (args: "--key", "value")
 			consumedNext, value = lookAheadValue(args[1])
 		}
