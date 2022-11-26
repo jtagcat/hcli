@@ -27,6 +27,11 @@ func TestParseNilDefs(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, []string{"hello", "-", "world"}, args)
 	assert.Equal(t, []string{"cHOKe", "return"}, chokeReturn)
+
+	args, chokeReturn, err = defs.Parse(nil, nil)
+	assert.Nil(t, err)
+	assert.Nil(t, chokeReturn)
+	assert.Nil(t, args)
 }
 
 func TestParseDoubledash(t *testing.T) {

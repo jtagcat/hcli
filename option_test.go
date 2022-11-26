@@ -6,8 +6,6 @@ import (
 	"time"
 )
 
-// TODO: AlsoBool
-
 func TestOptBool(t *testing.T) {
 	key := "k"
 	defs := Definitions{

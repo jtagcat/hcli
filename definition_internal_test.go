@@ -90,3 +90,18 @@ func TestTypeMetaMLen(t *testing.T) {
 		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(typeMetaM), int(typeMax)+1)
 	}
 }
+
+func TestDefinitionDigits(t *testing.T) {
+	t.Parallel()
+
+	defs := Definitions{
+		"1": &Definition{
+			Type: Bool,
+		},
+	}
+
+	err := defs.normalize()
+	if !errors.Is(err, ErrInvalidDefinition) {
+		t.Fatalf("error not %e, is %e", ErrInvalidDefinition, err)
+	}
+}
