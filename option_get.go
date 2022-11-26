@@ -4,13 +4,19 @@ import (
 	"time"
 )
 
-// Whether there was any option parsed matching the definition.
-func (def *Definition) Touched() bool {
+// Whether definition's value is a default value (was it set via Parse())
+func (def *Definition) Default() bool {
+	if def == nil {
+		return false
+	}
 	return def.parsed != nil
 }
 
-// Whether AlsoBool's type was changed to Bool on parsing.
+// For checking if AlsoBool's type was changed to Bool on parsing.
 func (def *Definition) IsBool() bool {
+	if def == nil {
+		return false
+	}
 	return def.Type == Bool
 }
 
@@ -23,7 +29,7 @@ func (def *Definition) IsBool() bool {
 //	true: 1
 //	true true true: 3
 func (def *Definition) Count() (v int, ok bool) {
-	if def.Type != Bool || def.parsed == nil {
+	if !def.Default() || def.Type != Bool {
 		return
 	}
 
@@ -39,8 +45,8 @@ func (o optBool) contents() any {
 }
 
 func (def *Definition) SlBool() ([]bool, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Bool || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Bool {
 		return nil, false
 	}
 
@@ -62,8 +68,8 @@ func (o optString) contents() any {
 }
 
 func (def *Definition) SlString() ([]string, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != String || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != String {
 		return nil, false
 	}
 
@@ -85,8 +91,8 @@ func (o optInt) contents() any {
 }
 
 func (def *Definition) SlInt() ([]int, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Int || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Int {
 		return nil, false
 	}
 
@@ -103,13 +109,13 @@ func (def *Definition) Int() (v int, ok bool) {
 
 // int64
 
-func (o *optInt64) contents() any {
+func (o optInt64) contents() any {
 	return o.value
 }
 
 func (def *Definition) SlInt64() ([]int64, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Int64 || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Int64 {
 		return nil, false
 	}
 
@@ -126,13 +132,13 @@ func (def *Definition) Int64() (v int64, ok bool) {
 
 // uint
 
-func (o *optUint) contents() any {
+func (o optUint) contents() any {
 	return o.value
 }
 
 func (def *Definition) SlUint() ([]uint, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Uint || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Uint {
 		return nil, false
 	}
 
@@ -149,13 +155,13 @@ func (def *Definition) Uint() (v uint, ok bool) {
 
 // uint64
 
-func (o *optUint64) contents() any {
+func (o optUint64) contents() any {
 	return o.value
 }
 
 func (def *Definition) SlUint64() ([]uint64, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Uint64 || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Uint64 {
 		return nil, false
 	}
 
@@ -172,13 +178,13 @@ func (def *Definition) Uint64() (v uint64, ok bool) {
 
 // float64
 
-func (o *optFloat64) contents() any {
+func (o optFloat64) contents() any {
 	return o.value
 }
 
 func (def *Definition) SlFloat64() ([]float64, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Float64 || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Float64 {
 		return nil, false
 	}
 
@@ -195,13 +201,13 @@ func (def *Definition) Float64() (v float64, ok bool) {
 
 // duration
 
-func (o *optDuration) contents() any {
+func (o optDuration) contents() any {
 	return o.value
 }
 
 func (def *Definition) SlDuration() ([]time.Duration, bool) {
-	// mismatched type or !def.Touched()
-	if def.Type != Duration || def.parsed == nil {
+	// not seen/parsed or mismatched type
+	if !def.Default() || def.Type != Duration {
 		return nil, false
 	}
 

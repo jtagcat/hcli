@@ -110,7 +110,7 @@ func TestParseLongOptEat(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, []string{"-t", "world"}, sl)
 
-	assert.Equal(t, false, defs[twoKey].Touched())
+	assert.Equal(t, false, defs[twoKey].Default())
 }
 
 func TestParseShortOptEat(t *testing.T) {
