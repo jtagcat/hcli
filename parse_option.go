@@ -33,6 +33,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '---'"),
 			})
 		}
+
 		if valueFound {
 			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,

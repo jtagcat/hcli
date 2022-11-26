@@ -35,7 +35,7 @@ func (def *Definition) Count() (v int, ok bool) {
 	}
 
 	for i := len(sl) - 1; i >= 0; i-- {
-		if sl[i] == false {
+		if !sl[i] {
 			break
 		}
 		v++

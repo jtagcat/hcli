@@ -16,10 +16,10 @@ type (
 	Definition  struct {
 		Type Type
 
-		// For short options (1-char length), this is ignored.
+		// For short options (1-char key), this is ignored.
 		// For long options:
 		//   false: Allows spaces (`--slug value`), in addition to `=` (`--slug=value`).
-		//   true: When "=" is not used, Type is Bool. Values (in `--slug=value`) are treated as bools, if strconv.ParseBool says so.
+		//   true: For defining boolean: `--slug`, `---slug`; for defining value: `--slug=value`
 		// Bools before a parsed Type are ignored. Any bools after Type are parsed as Type, and may result in ErrIncompatibleValue.
 		AlsoBool bool
 
@@ -41,6 +41,7 @@ func (defs Definitions) Alias(name string, target string) error {
 func (defs Definitions) normalize() error {
 	for name, def := range defs {
 		if def == nil || name == "" {
+
 			delete(defs, name)
 			continue
 		}
@@ -64,7 +65,6 @@ func (defs Definitions) normalize() error {
 		// short args are case sensitive, skip
 		if utf8.RuneCountInString(name) == 1 {
 			def.AlsoBool = false
-			continue
 		}
 
 		// case insensitivize long args
@@ -74,5 +74,6 @@ func (defs Definitions) normalize() error {
 			delete(defs, name)
 		}
 	}
+
 	return nil
 }

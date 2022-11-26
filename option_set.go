@@ -95,7 +95,7 @@ func (o *optInt64) add(s string) error {
 		return err
 	}
 
-	o.value = append(o.value, int64(v))
+	o.value = append(o.value, v)
 	return err
 }
 
@@ -143,7 +143,7 @@ func (o *optFloat64) add(s string) error {
 		return err
 	}
 
-	o.value = append(o.value, float64(v))
+	o.value = append(o.value, v)
 	return err
 }
 
@@ -159,7 +159,7 @@ func (o *optDuration) add(s string) error {
 		return err
 	}
 
-	o.value = append(o.value, time.Duration(v))
+	o.value = append(o.value, v)
 	return err
 }
 

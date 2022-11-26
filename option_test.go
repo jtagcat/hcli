@@ -1,15 +1,17 @@
-package harg
+package harg_test
 
 import (
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/jtagcat/harg"
 )
 
 func TestOptBool(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Bool},
+	defs := harg.Definitions{
+		key: {Type: harg.Bool},
 	}
 
 	want := []bool{true, true}
@@ -60,8 +62,8 @@ func TestOptBool(t *testing.T) {
 
 func TestOptString(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: String},
+	defs := harg.Definitions{
+		key: {Type: harg.String},
 	}
 
 	want := []string{"hello", "world"}
@@ -104,8 +106,8 @@ func TestOptString(t *testing.T) {
 
 func TestOptInt(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Int},
+	defs := harg.Definitions{
+		key: {Type: harg.Int},
 	}
 
 	want := []int{-1, 1}
@@ -148,8 +150,8 @@ func TestOptInt(t *testing.T) {
 
 func TestOptInt64(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Int64},
+	defs := harg.Definitions{
+		key: {Type: harg.Int64},
 	}
 
 	want := []int64{-1, 1}
@@ -192,8 +194,8 @@ func TestOptInt64(t *testing.T) {
 
 func TestOptUint(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Uint},
+	defs := harg.Definitions{
+		key: {Type: harg.Uint},
 	}
 
 	want := []uint{0, 1}
@@ -236,8 +238,8 @@ func TestOptUint(t *testing.T) {
 
 func TestOptUint64(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Uint64},
+	defs := harg.Definitions{
+		key: {Type: harg.Uint64},
 	}
 
 	want := []uint64{0, 1}
@@ -280,8 +282,8 @@ func TestOptUint64(t *testing.T) {
 
 func TestOptFloat64(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Float64},
+	defs := harg.Definitions{
+		key: {Type: harg.Float64},
 	}
 
 	want := []float64{-0.5, 0.5}
@@ -324,8 +326,8 @@ func TestOptFloat64(t *testing.T) {
 
 func TestOptDuration(t *testing.T) {
 	key := "k"
-	defs := Definitions{
-		key: {Type: Duration},
+	defs := harg.Definitions{
+		key: {Type: harg.Duration},
 	}
 
 	want := []time.Duration{3600000000000, 15000000000}

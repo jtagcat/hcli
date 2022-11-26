@@ -44,6 +44,7 @@ func (defs *Definitions) Parse(
 	if err := defs.normalize(); err != nil {
 		return nil, nil, err
 	}
+
 	chokeM := internal.SliceLowercaseIndex(chokes)
 
 	for {
