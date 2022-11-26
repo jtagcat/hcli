@@ -120,12 +120,37 @@ func TestParseLongOptEat(t *testing.T) {
 func TestParseShortOptEat(t *testing.T) {
 	t.Parallel()
 
-	// - Chokes are not detected as part of options (no choking:`--foo choke` foo:`choke`; no choking:`-o choke -b` o:`choke` b:`true`)
-	// - Short options are 1 utf8 character, case sensitive. [^TestParseShortOptEat]
-	// - When not using space between value, nothing and `=` is allowed as a delimiter (`-oval` → o:`val`, `-o=--val` → o:`--val`, `-o =val` → o:`=val`). [^TestParseShortOptEat]
-	// - Values that could be parsed as option keys (`-ao -c`) are parsed as keys (`o` is empty), not values (`-o=--bar` → `-o = "--bar"`). [^TestParseShortOptEat]
+	oneKey := "õ"
+	twoKey := "t"
+	fooKey := "f"
 
-	t.Fatal("not implemented")
+	defs := harg.Definitions{
+		oneKey: {Type: harg.String},
+		twoKey: {},
+		fooKey: {},
+	}
+
+	args, chokeReturn, err := defs.Parse(
+		[]string{
+			"hello",
+			"-õ=-t",
+			"-õ", "=-t",
+			"-õ", "-f",
+			"-õ",
+			"world",
+		}, []string{"world"},
+	)
+
+	assert.Nil(t, err)
+	assert.Nil(t, chokeReturn)
+	assert.Equal(t, []string{"hello"}, args)
+
+	sl, ok := defs[oneKey].SlString()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, []string{"-t", "=-t", "", "world"}, sl)
+
+	assert.Equal(t, false, defs[twoKey].Default())
+	assert.Equal(t, true, defs[fooKey].Default())
 }
 
 func TestParseLongOptNotSingleChar(t *testing.T) {

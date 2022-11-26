@@ -29,7 +29,6 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 		valueFound, value = true, "true"
 	}
 
-	// try to lookahead value (args: "--key", "value")
 	if !valueFound && len(args) > 1 {
 		consumedNext, value = lookAheadValue(args[1])
 	}
@@ -78,18 +77,17 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 
 			continue
 		}
-
-		// valueful opt, break loop
+		// valueful opt, break clustering loop
 
 		if len(argRune)-1 == optI {
+			consumedNext, value = lookAheadValue(args[1])
+		} else {
 			// value in same arg
 			value = string(argRune[optI+1:])
 			value = strings.TrimPrefix(value, "=")
-		} else if len(args) > 1 { // try to lookahead value (args: "--key", "value")
-			consumedNext, value = lookAheadValue(args[1])
 		}
 
-		return true, def.parseOptionContent(key, value)
+		return consumedNext, def.parseOptionContent(key, value)
 	}
 
 	return false, nil
