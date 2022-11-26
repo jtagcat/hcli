@@ -37,7 +37,6 @@
 [^TestParseShortOptEat]: Tested by `TestParseShortOptEat()`
 [^TestParseDoubledash]: Tested by `TestParseDoubledash()`
 [^TestParseLongOptAlsoBool]: Tested by `TestParseLongOptAlsoBool()`
-[^TestParseLongOptNotSingleChar]: Tested by `TestParseLongOptNotSingleChar()`
 [^TestParseShortOptClustering]: Tested by `TestParseShortOptClustering()`
 [^TestDefinitionNormalize]: Tested by `TestDefinitionNormalize()`
 [^TestParseCount]: Tested by `TestParseCount()`
