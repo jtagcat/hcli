@@ -11,9 +11,7 @@ func TestSetAlias(t *testing.T) {
 	t.Parallel()
 
 	defsOriginal := harg.Definitions{
-		"foo": {
-			Type: harg.String,
-		},
+		"foo": {Type: harg.String},
 	}
 	defs := defsOriginal
 

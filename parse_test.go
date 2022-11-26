@@ -274,12 +274,10 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 func TestParseError(t *testing.T) {
 	t.Parallel()
 
-	one, two, three := "str", "bool", "alsobool"
-
 	defs := harg.Definitions{
-		one:   {Type: harg.String},
-		two:   {},
-		three: {Type: harg.String, AlsoBool: true},
+		"str":      {Type: harg.String},
+		"bool":     {},
+		"alsobool": {Type: harg.String, AlsoBool: true},
 	}
 
 	for _, test := range []errTest{
