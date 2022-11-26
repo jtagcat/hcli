@@ -12,14 +12,14 @@ import (
 
 type (
 	// must not start with a decimal digit (0,1,2,3,4,5,6,7,8,9) (for ergonomic negative values)
-	Definitions map[string]*Definition // map[slug]; 1-character: short option, >1: long option
+	Definitions map[string]*Definition // map[key]; 1-character: short option, >1: long option
 	Definition  struct {
 		Type Type
 
 		// For short options (1-char key), this is ignored.
 		// For long options:
-		//   false: Allows spaces (`--slug value`), in addition to `=` (`--slug=value`).
-		//   true: For defining boolean: `--slug`, `---slug`; for defining value: `--slug=value`
+		//   false: Allows spaces (`--key value`), in addition to `=` (`--key=value`).
+		//   true: For defining boolean: `--key`, `---key`; for defining value: `--key=value`
 		// Bools before a parsed Type are ignored. Any bools after Type are parsed as Type, and may result in ErrIncompatibleValue.
 		AlsoBool bool
 

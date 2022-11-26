@@ -17,7 +17,16 @@ Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-
 - `hyaml`: `yaml`?
 - ~~Code generation?~~
 
-## Code flow
+## Metainfo
+`os.Args` is composed of the following:
+ - program name (`harg`)
+ - short options (`-v`, `-o something`)
+ - long options (`--foo bar`, `--foo=bar`)
+ - arguments (leftovers, `hello`, `world`)
+ - chokeReturn (the found choke and everything after it, see [`Parse()`](parse.go) or [FORMAT.md](FORMAT.md) for more)
+
+Non-boolean options have two parts: key (`foo`) and value (`bar`).
+### Code flow
 1. [`definition.go`](definition.go): definition structs
 1. [`parse.go`](parse.go): main routine, splits to short/long option
 1. [`parse_option.go`](parse_option.go): short and long option parsing
