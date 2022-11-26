@@ -2,13 +2,13 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/jtagcat/harg.svg)](https://pkg.go.dev/github.com/jtagcat/harg)
 
-GNU-compatible feature-complete Go argument parsing. See [FORMAT.md](FORMAT.md) for full specification.
+GNU-compatible feature-complete local-scoped Go argument parsing. See [`FORMAT.md`](FORMAT.md) for full specification.
 
-See also: https://github.com/urfave/cli/issues/833#issuecomment-1312834335
+***
 
-Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-friendly arguments' and 'harrrggghh!' 🏴‍☠️, finally something good for Go arguments!
+The name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-friendly arguments' and 'harrrggghh!' 🏴‍☠️, finally something splendid for Go arguments!
 
-### Next up:
+## Next up:
 - henv: Environment variables
 - [`urfave/cli@v3`](https://github.com/urfave/cli)?
 
@@ -17,13 +17,13 @@ Name is a play on https://git.meatballhat.com/x/argh; may also stand for 'human-
 - `hyaml`: `yaml`?
 - ~~Code generation?~~
 
-## Metainfo
+## Terminology
 `os.Args` is composed of the following:
  - program name (`harg`)
  - short options (`-v`, `-o something`)
  - long options (`--foo bar`, `--foo=bar`)
  - arguments (leftovers, `hello`, `world`)
- - chokeReturn (the found choke and everything after it, see [`Parse()`](parse.go) or [FORMAT.md](FORMAT.md) for more)
+ - chokeReturn (the found choke and everything after it, see [`Parse()`](parse.go) or [`FORMAT.md`](FORMAT.md) for more)
 
 Non-boolean options have two parts: key (`foo`) and value (`bar`).
 ### Code flow
