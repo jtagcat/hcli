@@ -8,8 +8,7 @@ import (
 	"github.com/jtagcat/harg/internal"
 )
 
-// long option (--foo) (--foo=value) ?(--foo value)
-// (--foo=ignored --foo=value) (--count --count) (--foo=elem1 --foo=elem2)
+// long option Bool (--foo) (---foo) or (--foo=value) (--foo) (--foo value)
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
 func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ error) {
@@ -20,7 +19,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 
 	key, value, valueFound := strings.Cut(argName, "=")
 
-	key, negateBool := trimPrefix(key, "-")
+	key, negateBool := trimPrefix(key, "-") // ---foo (three dashes negate)
 
 	def, err := defs.get(key)
 	if err != nil {
@@ -63,6 +62,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		panic("parseShortOption caller did not ensure len(args[0]) > 1")
 	}
 
+	// loop through clustered (-abc = -a -b -c) options
 	var negateNext bool
 	for optI, opt := range argRune {
 
@@ -70,7 +70,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		key := string(opt)
 
 		if key == "-" {
-			// new with harg: short option prefix "-" negates bools
+			// short option prefix "-" negates
 			negateNext = true
 			continue
 		}
@@ -96,7 +96,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '-'"),
 			})
 		}
-		// valueful opt, break clustering loop
+		// valueful opt, ending clustering loop
 
 		if len(argRune)-1 == optI {
 			consumedNext, value = lookAheadValue(args[1])

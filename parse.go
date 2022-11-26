@@ -20,8 +20,7 @@ var (
 
 // Parse Definitions. See FORMAT.md for the spec. See parse_test.go for examples.
 func (defs *Definitions) Parse(
-	args []string, // usually os.Args[1:]
-	// NB: Parse() does not remove program name (os.Args[0])
+	args []string, // usually os.Args[1:] (without program name)
 
 	chokes []string, // [case insensitive]
 	// Chokes allow for global-local-whatever argument definitions by using Parse() multiple times:
@@ -35,7 +34,7 @@ func (defs *Definitions) Parse(
 ) (
 	// parsed options get added to defs, see option_get.go (def.Touched(), .SlString(), .String(), ...)
 	parsed []string, // non-options, arguments
-	chokeReturn []string, // See above
+	chokeReturn []string, // see above
 	err error, // see above var() for possible errors
 ) {
 	if len(args) == 0 {

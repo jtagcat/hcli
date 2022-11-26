@@ -43,7 +43,7 @@ func (def *Definition) parseBoolValue(key string, val bool) error {
 	if def.Type != Bool {
 		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
 			Err:     ErrIncompatibleValue,
-			Wrapped: errors.New("AlsoBool can not have a Bool value after non-Bool value"),
+			Wrapped: errors.New("AlsoBool must not have a Bool value after non-Bool value"),
 		})
 	}
 
