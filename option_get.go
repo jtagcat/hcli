@@ -29,11 +29,18 @@ func (def *Definition) IsBool() bool {
 //	true: 1
 //	true true true: 3
 func (def *Definition) Count() (v int, ok bool) {
-	if !def.Default() || def.Type != Bool {
+	sl, ok := def.SlBool()
+	if !ok || len(sl) == 0 {
 		return
 	}
 
-	return def.parsed.contents().(optBoolVal).count, true
+	for i := len(sl) - 1; i >= 0; i-- {
+		if sl[i] == false {
+			break
+		}
+		v++
+	}
+	return v, true
 }
 
 //// generatable ////
@@ -50,7 +57,7 @@ func (def *Definition) SlBool() ([]bool, bool) {
 		return nil, false
 	}
 
-	return def.parsed.contents().(optBoolVal).value, true
+	return def.parsed.contents().([]bool), true
 }
 
 func (def *Definition) Bool() (v bool, ok bool) {

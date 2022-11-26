@@ -116,7 +116,7 @@ func argumentKind(arg string) argumentKindT {
 	switch utf8.RuneCountInString(arg) {
 	case 2: // "--"
 		return argumentDivider
-	case 3: // "--x", single negative short
+	case 3: // "--x", single negating short
 		return shortOption // len(a) > 1 or parseShortOption panics
 	default: // >= 3 or parseLongOption panics
 		return longOption

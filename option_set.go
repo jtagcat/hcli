@@ -1,6 +1,7 @@
 package harg
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -8,28 +9,16 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
-func (def *Definition) parseOptionContent(
-	key string,
-	value string, // "" means literally empty, caller has already defaulted valueless booleans to true
-) error { // errContext provided
-	// defs.normalize(): actual Type == Bool can never be AlsoBool
+type parsableValue struct {
+	isBool    bool
+	boolValue bool
+	value     string
+}
 
-	if def.AlsoBool &&
-		// try parsing as AlsoBool only when not already parsed as non-bool
-		(def.parsed == nil || def.Type == Bool) {
-
-		if def.parsed == nil {
-			def.parsed = typeMetaM[Bool].new()
-		}
-
-		if err := def.parsed.add(value); err == nil {
-			def.originalType = def.Type
-			def.Type = Bool
-			return nil
-		}
-
+func (def *Definition) parseOptionContent(key, value string) error { // errContext provided
+	// restore
+	if def.AlsoBool && def.originalType != Bool {
 		def.parsed, def.Type = nil, def.originalType
-		// on err continue to parse normally:
 	}
 
 	// initialize option interface
@@ -44,6 +33,29 @@ func (def *Definition) parseOptionContent(
 		})
 	}
 
+	return nil
+}
+
+func (def *Definition) parseBoolValue(key string, val bool) error {
+	// defs.normalize(): actual Type == Bool can never be AlsoBool
+
+	if def.parsed == nil {
+		def.parsed = typeMetaM[Bool].new()
+
+		if def.AlsoBool {
+			def.originalType = def.Type
+			def.Type = Bool
+		}
+	}
+
+	if def.Type != Bool {
+		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+			Err:     ErrIncompatibleValue,
+			Wrapped: errors.New("AlsoBool can not have a Bool value after non-Bool value"),
+		})
+	}
+
+	def.parsed.(*optBool).addT(val)
 	return nil
 }
 
@@ -84,13 +96,13 @@ var typeMetaM = map[Type]typeMeta{
 
 type (
 	optBool struct {
-		value optBoolVal
-	}
-	optBoolVal struct {
-		count int
 		value []bool
 	}
 )
+
+func (o *optBool) addT(v bool) {
+	o.value = append(o.value, v)
+}
 
 func (o *optBool) add(s string) error {
 	v, err := strconv.ParseBool(s)
@@ -98,13 +110,7 @@ func (o *optBool) add(s string) error {
 		return err
 	}
 
-	if v {
-		o.value.count++
-	} else {
-		o.value.count = 0
-	}
-
-	o.value.value = append(o.value.value, v)
+	o.value = append(o.value, v)
 	return nil
 }
 

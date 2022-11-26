@@ -31,24 +31,20 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 		if !(def.Type == Bool || def.AlsoBool) {
 			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
-				Wrapped: errors.New("only Bool option definitions can use negative prefix '---'"),
+				Wrapped: errors.New("only Bool option definitions can use negating prefix '---'"),
 			})
 		}
 		if valueFound {
 			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
-				Wrapped: errors.New("negative prefix '---' can't have any value (---option=value)"),
+				Wrapped: errors.New("negating prefix '---' can't have any value (---option=value)"),
 			})
 		}
 	}
 
-	// bool has no lookahead, default = true
+	// Bool has no lookahead, default = true
 	if value == "" && (def.Type == Bool || def.AlsoBool) {
-		valueFound, value = true, "true"
-
-		if negateBool {
-			value = "false"
-		}
+		return false, def.parseBoolValue(key, !negateBool)
 	}
 
 	if !valueFound && len(args) > 1 {
@@ -85,19 +81,20 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		}
 
 		if def.Type == Bool || def.AlsoBool {
-			if negateNext {
-				value = "false"
-				negateNext = false
-			} else {
-				value = "true"
-			}
-
-			err = def.parseOptionContent(key, value)
+			err := def.parseBoolValue(key, !negateNext)
 			if err != nil {
 				return false, err
 			}
 
+			negateNext = false
 			continue
+		}
+
+		if negateNext {
+			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+				Err:     ErrIncompatibleValue,
+				Wrapped: errors.New("only Bool option definitions can use negating prefix '-'"),
+			})
 		}
 		// valueful opt, break clustering loop
 

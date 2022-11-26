@@ -248,7 +248,7 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 	args, chokeReturn, err := defs.Parse(
 		[]string{
 			"---foo", "bar", // false
-			"--foo bar",  // true
+			"--foo", "bar", // true
 			"--bar=true", // "true", not true
 		}, nil,
 	)
@@ -261,17 +261,9 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 	assert.Equal(t, true, ok)
 	assert.Equal(t, []bool{false, true}, sl)
 
-	s, ok := defs[oneKey].String()
+	s, ok := defs[twoKey].String()
 	assert.Equal(t, true, ok)
 	assert.Equal(t, "true", s)
-
-	// - AlsoBool treats a valueless valueful option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
-	// - Values are always parsed as values. (`--foo=true` is string `true`, not value true) [^TestParseLongOptAlsoBool]
-	// TODO: rework ^
-	//     - Given multiple mixed bool/value same-slug options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
-	// TODO: waiting for feedback
-
-	t.Fatal("not implemented")
 }
 
 func TestParseError(t *testing.T) {
@@ -286,12 +278,12 @@ func TestParseError(t *testing.T) {
 	}
 
 	for _, test := range []errTest{
-		// Negative long option
+		// Negating long option
 		{in: []string{"---str"}, errIs: harg.ErrIncompatibleValue},       // not bool
 		{in: []string{"---bool=true"}, errIs: harg.ErrIncompatibleValue}, // bool with value
 
 		// AlsoBool after Value
-		{in: []string{"--alsobool=val --alsobool"}, errIs: harg.ErrIncompatibleValue},
+		{in: []string{"--alsobool=val", "--alsobool"}, errIs: harg.ErrIncompatibleValue},
 
 		// No definition
 		{in: []string{"--nodef"}, errIs: harg.ErrOptionHasNoDefinition},

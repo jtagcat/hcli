@@ -7,6 +7,7 @@
 - `-` is a plain argument. [^TestParseNilDefs]
 - Type Boolean:
     - `Count()`: Equal to the count of consecutive true values read from right/last [^TestParseCount]
+    - Can never have a value (`--foo=true`, `-f false`). Set true: `--foo`, `-f`, false: `---foo`, `--f`, `-xyz-f`
     - `AlsoBool` is ignored. [^TestDefinitionNormalize]
 - Prefix `--` and at least 2 UTF-8 characters means long options follow. [^TestAliasParse]
     - Long options are case insensitive. [^TestParseLongOptEat]
@@ -49,5 +50,6 @@ Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 - def.Sl(): (`--foo bar --foo baz` foo:{`bar`,`baz`})
 - Space seperator (lookahead) in long options.
     - `AlsoBool`: Disallows space seperator, allows mixed bool (`--foo`) and valueful (`--foo=value`) definitions.
-- Negative short options: adding `-` before a short option means `false`.
+- Negating short options: adding `-` before a short option means `false` (`--f`, `-b-f`).
+- Negating long options: adding `-` before a long option means `false` (`---foo`).
 - Chokes enables parsing until a keyword is found. This allows crafting global-local-superglobal-whatever options.
