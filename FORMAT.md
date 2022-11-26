@@ -19,10 +19,10 @@
         - Given multiple mixed bool/value options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
 - Prefix `-` means short options follow.
     - Short options are 1 utf8 character, case sensitive. [^TestParseShortOptEat]
-    - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`) [^TestParseShortOptClustering]
-    - Preceeding `-` negates the following bool, otherwise ignored. (`--a` a:`false`; `-a-bc` a:`true` b:`false` c:`true`) [^TestParseShortOptClustering]
-        - If `-` is used for the first short option, short options can't be clustered. (invalid:`--ab`; invalid:`--a-b` (seen as long options)) [^TestParseShortOptClustering]
-    - Non-bools take arguments until space or from the next argument. (`-aovalue`, `-ao value` a:`false` o:`value`) [^TestParseShortOptClustering]
+    - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`) [^TestParseShortBoolOpt], [^TestParseCount]
+    - Preceeding `-` negates the following bool, otherwise ignored. (`--a` a:`false`; `-a-bc` a:`true` b:`false` c:`true`) [^TestParseShortBoolOpt], [^TestParseCount]
+        - If `-` is used for the first short option, short options can't be clustered. (invalid:`--ab`; invalid:`--a-b` (seen as long options)) [^TestParseShortBoolOpt]
+    - Non-bools take arguments until space or from the next argument. (`-aovalue`, `-ao value` a:`false` o:`value`) [^TestParseShortOptEat]
       - When not using space between value, nothing and `=` is allowed as a delimiter (`-oval` → o:`val`, `-o=--val` → o:`--val`, `-o =val` → o:`=val`). [^TestParseShortOptEat]
       - Values that could be parsed as option keys (`-ao -c`) are parsed as keys (o:empty), not as values (`-o=--bar` → o:`--bar`). [^TestParseShortOptEat]
     - `AlsoBool` is ignored, option is always treated as Type. [^TestDefinitionNormalize]
@@ -37,7 +37,7 @@
 [^TestParseShortOptEat]: Tested by `TestParseShortOptEat()`
 [^TestParseDoubledash]: Tested by `TestParseDoubledash()`
 [^TestParseLongOptAlsoBool]: Tested by `TestParseLongOptAlsoBool()`
-[^TestParseShortOptClustering]: Tested by `TestParseShortOptClustering()`
+[^TestParseShortBoolOpt]: Tested by `TestParseShortBoolOpt()`
 [^TestDefinitionNormalize]: Tested by `TestDefinitionNormalize()`
 [^TestParseCount]: Tested by `TestParseCount()`
 

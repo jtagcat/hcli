@@ -19,7 +19,7 @@ func (def *Definition) parseOptionContent(
 		(def.parsed == nil || def.Type == Bool) {
 
 		if def.parsed == nil {
-			def.parsed = typeMetaM[Bool].emptyT
+			def.parsed = typeMetaM[Bool].new()
 		}
 
 		if err := def.parsed.add(value); err == nil {
@@ -34,7 +34,7 @@ func (def *Definition) parseOptionContent(
 
 	// initialize option interface
 	if def.parsed == nil {
-		def.parsed = typeMetaM[def.Type].emptyT
+		def.parsed = typeMetaM[def.Type].new()
 	}
 
 	if err := def.parsed.add(value); err != nil {
@@ -64,18 +64,19 @@ const (
 ) //
 var typeMax = Duration
 
-var typeMetaM = map[Type]struct {
+type typeMeta struct {
 	errName string
-	emptyT  option
-}{
-	Bool:     {"bool", &optBool{}},
-	String:   {"string", &optString{}},
-	Int:      {"int", &optInt{}},
-	Int64:    {"int64", &optInt64{}},
-	Uint:     {"uint", &optUint{}},
-	Uint64:   {"uint64", &optUint64{}},
-	Float64:  {"float64", &optFloat64{}},
-	Duration: {"duration", &optDuration{}},
+	new     func() option
+} //
+var typeMetaM = map[Type]typeMeta{
+	Bool:     {"bool", func() option { return &optBool{} }},
+	String:   {"string", func() option { return &optString{} }},
+	Int:      {"int", func() option { return &optInt{} }},
+	Int64:    {"int64", func() option { return &optInt64{} }},
+	Uint:     {"uint", func() option { return &optUint{} }},
+	Uint64:   {"uint64", func() option { return &optUint64{} }},
+	Float64:  {"float64", func() option { return &optFloat64{} }},
+	Duration: {"duration", func() option { return &optDuration{} }},
 }
 
 // bool / count

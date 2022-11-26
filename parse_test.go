@@ -1,6 +1,7 @@
 package harg_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/jtagcat/harg"
@@ -57,14 +58,13 @@ func TestAliasParse(t *testing.T) {
 	defs := harg.Definitions{
 		oneKey: {Type: harg.String},
 	}
-	assert.Nil(t,
-		defs.Alias("twõ", oneKey))
+	assert.Nil(t, defs.Alias("twõか", oneKey))
 
 	args, chokeReturn, err := defs.Parse(
 		[]string{
 			"hello",
 			"--one=one",
-			"--twõ", "two",
+			"--twõか", "two",
 			"world",
 		}, nil,
 	)
@@ -85,9 +85,7 @@ func TestAliasParse(t *testing.T) {
 func TestParseLongOptEat(t *testing.T) {
 	t.Parallel()
 
-	oneKey := "one"
-	twoKey := "t"
-	fooKey := "f"
+	oneKey, twoKey, fooKey := "oかe", "t", "f"
 
 	defs := harg.Definitions{
 		oneKey: {Type: harg.String},
@@ -98,9 +96,9 @@ func TestParseLongOptEat(t *testing.T) {
 	args, chokeReturn, err := defs.Parse(
 		[]string{
 			"hello",
-			"--OnE=-t",
-			"--oNE", "-f",
-			"--one",
+			"--OかE=-t",
+			"--oかE", "-f",
+			"--oかe",
 			"world",
 		}, []string{"world"},
 	)
@@ -120,9 +118,7 @@ func TestParseLongOptEat(t *testing.T) {
 func TestParseShortOptEat(t *testing.T) {
 	t.Parallel()
 
-	oneKey := "õ"
-	twoKey := "t"
-	fooKey := "f"
+	oneKey, twoKey, fooKey := "か", "t", "f"
 
 	defs := harg.Definitions{
 		oneKey: {Type: harg.String},
@@ -133,10 +129,11 @@ func TestParseShortOptEat(t *testing.T) {
 	args, chokeReturn, err := defs.Parse(
 		[]string{
 			"hello",
-			"-õ=-t",
-			"-õ", "=-t",
-			"-õ", "-f",
-			"-õ",
+			"-かt",
+			"-か=-t",
+			"-か", "=-t",
+			"-か", "-f",
+			"-か",
 			"world",
 		}, []string{"world"},
 	)
@@ -147,44 +144,129 @@ func TestParseShortOptEat(t *testing.T) {
 
 	sl, ok := defs[oneKey].SlString()
 	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"-t", "=-t", "", "world"}, sl)
+	assert.Equal(t, []string{"t", "-t", "=-t", "", "world"}, sl)
 
 	assert.Equal(t, false, defs[twoKey].Default())
 	assert.Equal(t, true, defs[fooKey].Default())
 }
 
-func TestParseLongOptNotSingleChar(t *testing.T) {
-	t.Parallel()
-	// "--a" doesn't go to long
-	t.Fatal("not implemented")
-}
-
-func TestParseShortOptClustering(t *testing.T) {
+func TestParseShortBoolOpt(t *testing.T) {
 	t.Parallel()
 
-	// - Short options can be clustered after the prefix. (`-abc` a:`true` b:`true` c:`true`) [^TestParseShortOptClustering]
-	// - Preceeding `-` negates the following bool, otherwise ignored. (`--a` a:`false`; `-a-bc` a:`true` b:`false` c:`true`) [^TestParseShortOptClustering]
-	//     - If `-` is used for the first short option, short options can't be clustered. (invalid:`--ab`; invalid:`--a-b` (seen as long options)) [^TestParseShortOptClustering]
-	// - Non-bools take arguments until space or from the next argument. (`-aovalue`, `-ao value` a:`false` o:`value`) [^TestParseShortOptClustering]
+	zeroKey, oneKey, twoKey := "か", "õ", "x"
+	unsetKey := "u"
 
-	t.Fatal("not implemented")
-}
+	defs := harg.Definitions{
+		zeroKey:  {},
+		oneKey:   {},
+		twoKey:   {},
+		unsetKey: {},
+	}
+	assert.Nil(t, defs.Alias("õx", zeroKey))
 
-func TestParseLongOptAlsoBool(t *testing.T) {
-	t.Parallel()
+	for in, want := range map[string][]bool{
+		"-か":      {true, false, false},
+		"-か\n--か": {false, false, false},
+		"-かõ-x":   {true, true, false},
+		"-か-õx":   {true, false, true},
+		"-か-õ-x":  {true, false, false},
+		"--õx":    {true, false, false},
+	} {
+		defs := defs
 
-	// - AlsoBool treats a valueless valueful option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
-	//     - Space-seperated syntax is unavailable. (invalid:`--foo value`) [^TestParseLongOptAlsoBool]
-	//     - Bools in values are parsed as booleans. (`--foo=true` is bool, not string "true") [^TestParseLongOptAlsoBool]
-	//     - Given multiple mixed bool/value same-slug options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
+		args, chokeReturn, err := defs.Parse(
+			strings.Split(in, "\n"), nil,
+		)
 
-	t.Fatal("not implemented")
+		assert.Nil(t, err)
+		assert.Nil(t, chokeReturn)
+		assert.Nil(t, args)
+
+		set := defs[unsetKey].Default()
+		assert.Equal(t, false, set)
+
+		b, ok := defs[zeroKey].Bool()
+		assert.Equal(t, true, ok)
+		assert.Equal(t, want[0], b)
+
+		b, _ = defs[oneKey].Bool()
+		assert.Equal(t, want[1], b)
+
+		b, _ = defs[twoKey].Bool()
+		assert.Equal(t, want[2], b)
+	}
 }
 
 func TestParseCount(t *testing.T) {
 	t.Parallel()
 
-	// - `Count()`: Equal to the count of consecutive true values read from right/last [^TestParseCount]
+	// also responsible for testing if typeMap.new() actually copies or no
+
+	zeroKey, oneKey := "a", "b"
+	defs := harg.Definitions{
+		zeroKey: {},
+		oneKey:  {},
+	}
+
+	args, chokeReturn, err := defs.Parse(
+		[]string{
+			"-a-aaaa-a",
+			"--b", "-b-b-bbb",
+		}, nil,
+	)
+
+	assert.Nil(t, err)
+	assert.Nil(t, chokeReturn)
+	assert.Nil(t, args)
+
+	sl, ok := defs[zeroKey].SlBool()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, []bool{true, false, true, true, true, false}, sl)
+	c, ok := defs[zeroKey].Count()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, 0, c)
+
+	sl, ok = defs[oneKey].SlBool()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, []bool{false, true, false, false, true, true}, sl)
+	c, ok = defs[oneKey].Count()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, 2, c)
+}
+
+func TestParseLongOptAlsoBool(t *testing.T) {
+	t.Parallel()
+
+	oneKey, twoKey := "foo", "bar"
+
+	defs := harg.Definitions{
+		oneKey: {Type: harg.String, AlsoBool: true},
+		twoKey: {Type: harg.String, AlsoBool: true},
+	}
+
+	args, chokeReturn, err := defs.Parse(
+		[]string{
+			"--foo bar",  // true
+			"--bar=true", // "true", not true
+		}, nil,
+	)
+
+	assert.Nil(t, err)
+	assert.Nil(t, chokeReturn)
+	assert.Equal(t, []string{"bar", "world"}, args)
+
+	sl, ok := defs[oneKey].SlString()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, []string{"one", "two"}, sl)
+
+	s, ok := defs[oneKey].String()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, "two", s)
+
+	// - AlsoBool treats a valueless valueful option as a bool. (`--foo`; `--foo=value`) [^TestParseLongOptAlsoBool]
+	// - Values are always parsed as values. (`--foo=true` is string `true`, not value true) [^TestParseLongOptAlsoBool]
+	// TODO: rework ^
+	//     - Given multiple mixed bool/value same-slug options, bools before values are ignored, and bools after value error. [^TestParseLongOptAlsoBool]
 
 	t.Fatal("not implemented")
 }
