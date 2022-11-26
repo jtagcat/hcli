@@ -1,6 +1,7 @@
 package harg
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -12,21 +13,34 @@ import (
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
 func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ error) {
-	argName := args[0][2:] // [2:]: remove suffix "--"
+	argName := args[0][2:] // [2:]: remove prefix "--"
 	if argName == "" {
 		panic("parseLongOption caller did not ensure len(args[0]) > 2")
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
 
+	key, negateBool := trimPrefix(key, "-")
+
 	def, err := defs.get(key)
 	if err != nil {
 		return false, err
 	}
 
+	if negateBool && !(def.Type == Bool || def.AlsoBool) {
+		return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+			Err:     ErrIncompatibleValue,
+			Wrapped: errors.New("only Bool definitions can use negative prefix '---'"),
+		})
+	}
+
 	// bool has no lookahead, default = true
 	if value == "" && (def.Type == Bool || def.AlsoBool) {
 		valueFound, value = true, "true"
+
+		if negateBool {
+			value = "false"
+		}
 	}
 
 	if !valueFound && len(args) > 1 {
@@ -40,7 +54,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 //
 // caller should ensure len(args[i]) >= 2; and defs.checkDefs()
 func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ error) {
-	argRune := []rune(args[0][1:]) // [1:]: skip 0th "-"
+	argRune := []rune(args[0][1:]) // [1:]: remove prefix "-"
 	if len(argRune) == 0 {
 		panic("parseShortOption caller did not ensure len(args[0]) > 1")
 	}
@@ -110,4 +124,12 @@ func (defs Definitions) get(key string) (*Definition, error) {
 	}
 
 	return nil, fmt.Errorf("%s: %w", internal.KeyErrorName(key), ErrOptionHasNoDefinition)
+}
+
+// strings.TrimPrefix with ok
+func trimPrefix(s, prefix string) (string, bool) {
+	if !strings.HasPrefix(s, prefix) {
+		return s, false
+	}
+	return strings.TrimPrefix(s, prefix), true
 }
