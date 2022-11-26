@@ -34,6 +34,10 @@ func (def *Definition) Count() (v int, ok bool) {
 
 // bool
 
+func (o optBool) contents() any {
+	return o.value
+}
+
 func (def *Definition) SlBool() ([]bool, bool) {
 	// mismatched type or !def.Touched()
 	if def.Type != Bool || def.parsed == nil {

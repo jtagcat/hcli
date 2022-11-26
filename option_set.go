@@ -90,10 +90,6 @@ type (
 	}
 )
 
-func (o *optBool) contents() any {
-	return o.value
-}
-
 func (o *optBool) add(s string) error {
 	v, err := strconv.ParseBool(s)
 	if err != nil {
