@@ -3,6 +3,7 @@ package harg
 import (
 	"errors"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 
 	internal "github.com/jtagcat/harg/internal"

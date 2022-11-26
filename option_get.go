@@ -9,7 +9,7 @@ func (def *Definition) Default() bool {
 	if def == nil {
 		return false
 	}
-	return def.parsed != nil
+	return def.parsed == nil
 }
 
 // For checking if AlsoBool's type was changed to Bool on parsing.
@@ -53,7 +53,7 @@ func (o optBool) contents() any {
 
 func (def *Definition) SlBool() ([]bool, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Bool {
+	if def.Default() || def.Type != Bool {
 		return nil, false
 	}
 
@@ -76,7 +76,7 @@ func (o optString) contents() any {
 
 func (def *Definition) SlString() ([]string, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != String {
+	if def.Default() || def.Type != String {
 		return nil, false
 	}
 
@@ -99,7 +99,7 @@ func (o optInt) contents() any {
 
 func (def *Definition) SlInt() ([]int, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Int {
+	if def.Default() || def.Type != Int {
 		return nil, false
 	}
 
@@ -122,7 +122,7 @@ func (o optInt64) contents() any {
 
 func (def *Definition) SlInt64() ([]int64, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Int64 {
+	if def.Default() || def.Type != Int64 {
 		return nil, false
 	}
 
@@ -145,7 +145,7 @@ func (o optUint) contents() any {
 
 func (def *Definition) SlUint() ([]uint, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Uint {
+	if def.Default() || def.Type != Uint {
 		return nil, false
 	}
 
@@ -168,7 +168,7 @@ func (o optUint64) contents() any {
 
 func (def *Definition) SlUint64() ([]uint64, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Uint64 {
+	if def.Default() || def.Type != Uint64 {
 		return nil, false
 	}
 
@@ -191,7 +191,7 @@ func (o optFloat64) contents() any {
 
 func (def *Definition) SlFloat64() ([]float64, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Float64 {
+	if def.Default() || def.Type != Float64 {
 		return nil, false
 	}
 
@@ -214,7 +214,7 @@ func (o optDuration) contents() any {
 
 func (def *Definition) SlDuration() ([]time.Duration, bool) {
 	// not seen/parsed or mismatched type
-	if !def.Default() || def.Type != Duration {
+	if def.Default() || def.Type != Duration {
 		return nil, false
 	}
 
