@@ -2,6 +2,7 @@ package harg
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 )
 
@@ -103,5 +104,37 @@ func TestDefinitionDigits(t *testing.T) {
 	err := defs.normalizeOpts()
 	if !errors.Is(err, ErrInvalidDefinition) {
 		t.Fatalf("error not %e, is %e", ErrInvalidDefinition, err)
+	}
+}
+
+func TestDefinitionNormalizeEnv(t *testing.T) {
+	t.Parallel()
+
+	defs := Definitions{
+		"UPPERかSÉ":  {},
+		"lowercase": {},
+	}
+
+	if err := defs.normalizeEnv(); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, name := range []string{"UPPERかSÉ", "lowercase", "LOWERCASE"} {
+		if _, ok := defs[name]; !ok {
+			t.Errorf("%s should be in Definitions", name)
+		}
+	}
+}
+
+func TestDefinitionNormalizeBadEnv(t *testing.T) {
+	t.Parallel()
+
+	for _, defs := range []Definitions{
+		{"no spaces": {}},
+		{"❌": {}},
+	} {
+		if err := defs.normalizeEnv(); err == nil {
+			t.Fatal(fmt.Sprintf("should error: with %v", defs))
+		}
 	}
 }

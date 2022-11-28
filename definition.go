@@ -41,6 +41,17 @@ func (defs Definitions) Alias(name string, target string) error {
 	return nil
 }
 
+func (defs Definitions) get(key string) (*Definition, error) {
+	key = strings.ToLower(key)
+
+	def, ok := defs[key]
+	if ok {
+		return def, nil
+	}
+
+	return nil, fmt.Errorf("%s: %w", internal.OptErrorName(key), ErrOptionHasNoDefinition)
+}
+
 func (defs Definitions) genericNormalize(transform func(key string, def *Definition) (newKey string, _ error)) error {
 	for key, def := range defs {
 		if def == nil || key == "" {
@@ -94,13 +105,17 @@ func (defs Definitions) normalizeOpts() error {
 	})
 }
 
-func (defs Definitions) get(key string) (*Definition, error) {
-	key = strings.ToLower(key)
+func (defs Definitions) normalizeEnv() error {
+	return defs.genericNormalize(func(key string, def *Definition) (string, error) {
+		for _, r := range key {
+			if r == '_' || unicode.IsLetter(r) || unicode.IsDigit(r) {
+				continue
+			}
 
-	def, ok := defs[key]
-	if ok {
-		return def, nil
-	}
+			return key, fmt.Errorf("must contain only underscores, letters and/or digits")
+		}
 
-	return nil, fmt.Errorf("%s: %w", internal.OptErrorName(key), ErrOptionHasNoDefinition)
+		// capitalize all keys
+		return strings.ToUpper(key), nil
+	})
 }
