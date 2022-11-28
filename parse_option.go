@@ -18,6 +18,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
+	errContext := func() string { return internal.KeyErrorName(key) }
 
 	key, negateBool := trimPrefix(key, "-") // ---foo (three dashes negate)
 
@@ -28,14 +29,14 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 
 	if negateBool {
 		if !(def.Type == Bool || def.AlsoBool) {
-			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '---'"),
 			})
 		}
 
 		if valueFound {
-			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("negating prefix '---' can't have any value (---option=value)"),
 			})
@@ -44,14 +45,14 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 
 	// Bool has no lookahead, default = true
 	if value == "" && (def.Type == Bool || def.AlsoBool) {
-		return false, def.parseBoolValue(key, !negateBool)
+		return false, def.parseBoolValue(!negateBool, errContext)
 	}
 
 	if !valueFound && len(args) > 1 {
 		consumedNext, value = lookAheadValue(args[1])
 	}
 
-	return consumedNext, def.parseOptionValue(key, value)
+	return consumedNext, def.parseValue(value, errContext)
 }
 
 // short option(s) (-f) (-fff) (-fb) (-fbvalue) (-fb value) (--n) (-y-ny)
@@ -69,6 +70,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 
 		value := ""
 		key := string(opt)
+		errContext := func() string { return internal.KeyErrorName(key) }
 
 		if key == "-" {
 			// short option prefix "-" negates
@@ -82,7 +84,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		}
 
 		if def.Type == Bool || def.AlsoBool {
-			err := def.parseBoolValue(key, !negateNext)
+			err := def.parseBoolValue(!negateNext, errContext)
 			if err != nil {
 				return false, err
 			}
@@ -92,7 +94,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		}
 
 		if negateNext {
-			return false, fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '-'"),
 			})
@@ -107,7 +109,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 			value = strings.TrimPrefix(value, "=")
 		}
 
-		return consumedNext, def.parseOptionValue(key, value)
+		return consumedNext, def.parseValue(value, errContext)
 	}
 
 	return false, nil

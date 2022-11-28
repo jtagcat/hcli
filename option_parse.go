@@ -7,7 +7,7 @@ import (
 	internal "github.com/jtagcat/harg/internal"
 )
 
-func (def *Definition) parseOptionValue(key, value string) error { // errContext provided
+func (def *Definition) parseValue(value string, errContext func() string) error { // errContext provided
 	// restore
 	if def.AlsoBool && def.originalType != Bool {
 		def.parsed, def.Type = nil, def.originalType
@@ -19,7 +19,7 @@ func (def *Definition) parseOptionValue(key, value string) error { // errContext
 	}
 
 	if err := def.parsed.add(value); err != nil {
-		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
 			Err:     ErrIncompatibleValue,
 			Wrapped: err,
 		})
@@ -28,7 +28,7 @@ func (def *Definition) parseOptionValue(key, value string) error { // errContext
 	return nil
 }
 
-func (def *Definition) parseBoolValue(key string, val bool) error {
+func (def *Definition) parseBoolValue(val bool, errContext func() string) error {
 	// defs.normalize(): actual Type == Bool can never be AlsoBool
 
 	if def.parsed == nil {
@@ -41,7 +41,7 @@ func (def *Definition) parseBoolValue(key string, val bool) error {
 	}
 
 	if def.Type != Bool {
-		return fmt.Errorf("parsing %s as %s: %w", internal.KeyErrorName(key), typeMetaM[def.Type].errName, internal.GenericErr{
+		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
 			Err:     ErrIncompatibleValue,
 			Wrapped: errors.New("AlsoBool must not have a Bool value after non-Bool value"),
 		})
