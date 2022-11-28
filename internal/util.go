@@ -25,7 +25,7 @@ func LowercaseLongKey(key string) string {
 	return strings.ToLower(key)
 }
 
-func KeyErrorName(key string) string {
+func OptErrorName(key string) string {
 	var keyType string
 	if utf8.RuneCountInString(key) > 1 {
 		keyType = "long"

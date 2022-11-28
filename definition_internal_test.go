@@ -10,7 +10,7 @@ func TestDefinitionNormalizeNilMap(t *testing.T) {
 
 	defs := Definitions{}
 
-	if err := defs.normalize(); err != nil {
+	if err := defs.normalizeOpts(); err != nil {
 		t.Error(err)
 	}
 
@@ -42,7 +42,7 @@ func TestDefinitionNormalize(t *testing.T) {
 		},
 	}
 
-	if err := defs.normalize(); err != nil {
+	if err := defs.normalizeOpts(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -77,7 +77,7 @@ func TestDefinitionOverMax(t *testing.T) {
 		},
 	}
 
-	err := defs.normalize()
+	err := defs.normalizeOpts()
 	if !errors.Is(err, ErrInvalidDefinition) {
 		t.Fatalf("error not %e, is %e", ErrInvalidDefinition, err)
 	}
@@ -100,7 +100,7 @@ func TestDefinitionDigits(t *testing.T) {
 		},
 	}
 
-	err := defs.normalize()
+	err := defs.normalizeOpts()
 	if !errors.Is(err, ErrInvalidDefinition) {
 		t.Fatalf("error not %e, is %e", ErrInvalidDefinition, err)
 	}

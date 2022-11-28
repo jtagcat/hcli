@@ -18,7 +18,7 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 	}
 
 	key, value, valueFound := strings.Cut(argName, "=")
-	errContext := func() string { return internal.KeyErrorName(key) }
+	errContext := func() string { return fmt.Sprintf("long option %s", key) }
 
 	key, negateBool := trimPrefix(key, "-") // ---foo (three dashes negate)
 
@@ -70,7 +70,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 
 		value := ""
 		key := string(opt)
-		errContext := func() string { return internal.KeyErrorName(key) }
+		errContext := func() string { return fmt.Sprintf("short option %s", key) }
 
 		if key == "-" {
 			// short option prefix "-" negates
@@ -121,17 +121,6 @@ func lookAheadValue(nextArg string) (consumedNext bool, value string) {
 	}
 
 	return true, nextArg
-}
-
-func (defs Definitions) get(key string) (*Definition, error) {
-	key = strings.ToLower(key)
-
-	def, ok := defs[key]
-	if ok {
-		return def, nil
-	}
-
-	return nil, fmt.Errorf("%s: %w", internal.KeyErrorName(key), ErrOptionHasNoDefinition)
 }
 
 // strings.TrimPrefix with ok

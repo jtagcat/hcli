@@ -41,7 +41,7 @@ func (defs *Definitions) Parse(
 		return nil, nil, nil
 	}
 
-	if err := defs.normalize(); err != nil {
+	if err := defs.normalizeOpts(); err != nil {
 		return nil, nil, err
 	}
 
