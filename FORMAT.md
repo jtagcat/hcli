@@ -29,6 +29,8 @@
     - After a choke is found, the choke and any unparsed arguments are returned on chokeReturn. [^TestParseNilDefs]
     - Chokes are not detected after arguments are ended (`--`) (no choking:`-- choke`). [^TestParseDoubledash]
     - Chokes are not detected as part of options (`--foo choke` `-o choke`) [^TestParseLongOptEat], [^TestParseShortOptEat]
+- If `EnvCSV` is specified in definition, environment values are split by comma (to a slice). [^TestParseEnv]
+
 
 [^TestParseNilDefs]: Tested by `TestParseNilDefs()`
 [^TestParseLongOptEat]: Tested by `TestParseLongOptEat()`
@@ -40,7 +42,7 @@
 [^TestParseCount]: Tested by `TestParseCount()`
 [^TestParseError]: Tested by `TestParseError()`
 [^TestDefinitionDigits]: Tested by `TestDefinitionDigits()`
-
+[^TestParseEnv]: Tested by `TestParseEnv()`
 ### Additions compared to GNU:
 Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html, the following has been added:
 

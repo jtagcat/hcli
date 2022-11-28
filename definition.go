@@ -23,6 +23,9 @@ type (
 		// Bools before a parsed Type are ignored. Any bools after Type are parsed as Type, and may result in ErrIncompatibleValue.
 		AlsoBool bool
 
+		// defs.ParseEnv(): If enabled, environment value will be split by commas (to slice).
+		EnvCSV bool
+
 		originalType Type // used in parsing AlsoBool
 		parsed       option
 	}
@@ -38,7 +41,7 @@ func (defs Definitions) Alias(name string, target string) error {
 	return nil
 }
 
-func (defs Definitions) genericNormalize(transform func(key string, def *Definition) (newKey string)) error {
+func (defs Definitions) genericNormalize(transform func(key string, def *Definition) (newKey string, _ error)) error {
 	for key, def := range defs {
 		if def == nil || key == "" {
 			delete(defs, key)
@@ -54,7 +57,7 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 
 		if unicode.IsDigit(rune(key[0])) {
 			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
-				Err: ErrInvalidDefinition, Wrapped: errors.New("Definition name can't start with a digit"),
+				Err: ErrInvalidDefinition, Wrapped: errors.New("Definition key can't start with a digit"),
 			})
 		}
 
@@ -62,7 +65,12 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 			def.AlsoBool = false // for parseOptionContent()
 		}
 
-		new := transform(key, def)
+		new, err := transform(key, def)
+		if err != nil {
+			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
+				Err: ErrInvalidDefinition, Wrapped: err,
+			})
+		}
 
 		// alias, not delete, as opaque normalization might lead to unexpected key change (for retrival after parse)
 		if key != new {
@@ -74,15 +82,15 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 }
 
 func (defs Definitions) normalizeOpts() error {
-	return defs.genericNormalize(func(key string, def *Definition) string {
+	return defs.genericNormalize(func(key string, def *Definition) (string, error) {
 		// short args are case sensitive, skip
 		if utf8.RuneCountInString(key) == 1 {
 			def.AlsoBool = false
-			return key
+			return key, nil
 		}
 
 		// case insensitivize long args
-		return strings.ToLower(key)
+		return strings.ToLower(key), nil
 	})
 }
 

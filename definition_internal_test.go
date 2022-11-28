@@ -46,13 +46,13 @@ func TestDefinitionNormalize(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	for _, name := range []string{"test", "nil", "Uppercase"} {
+	for _, name := range []string{"test", "nil"} {
 		if _, ok := defs[name]; ok {
 			t.Errorf("%s should not be in Definitions", name)
 		}
 	}
 
-	for _, name := range []string{"uppercase", "lowercase", "S", "s"} {
+	for _, name := range []string{"Uppercase", "uppercase", "lowercase", "S", "s"} {
 		if _, ok := defs[name]; !ok {
 			t.Errorf("%s should be in Definitions", name)
 		}

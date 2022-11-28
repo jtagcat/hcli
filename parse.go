@@ -140,7 +140,7 @@ func (defs *Definitions) ParseEnv() error {
 	}
 
 	for _, env := range os.Environ() {
-		key, val := parseEnviron(env)
+		key, rawVal := parseEnviron(env)
 		errContext := func() string { return fmt.Sprintf("environment %s", key) }
 
 		def, ok := (*defs)[key]
@@ -148,15 +148,22 @@ func (defs *Definitions) ParseEnv() error {
 			continue // ignore unrecognized env
 		}
 
-		if def.AlsoBool {
-			boolVal, err := strconv.ParseBool(val)
-			if err == nil {
-				def.parseBoolValue(boolVal, errContext)
-			}
+		vals := []string{rawVal}
+		if def.EnvCSV {
+			vals = strings.Split(rawVal, ",")
 		}
 
-		if err := def.parseValue(val, errContext); err != nil {
-			return err
+		for _, val := range vals {
+			if def.AlsoBool {
+				boolVal, err := strconv.ParseBool(val)
+				if err == nil {
+					def.parseBoolValue(boolVal, errContext)
+				}
+			}
+
+			if err := def.parseValue(val, errContext); err != nil {
+				return err
+			}
 		}
 	}
 
