@@ -2,6 +2,9 @@ package harg
 
 import (
 	"errors"
+	"fmt"
+	"os"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -126,4 +129,43 @@ func argumentKind(arg string) argumentKindT {
 	default: // >= 3 or parseLongOption panics
 		return longOption
 	}
+}
+
+// Parses Definitions from the Environment.
+//
+// All definitions will be transformed to uppercase. Spaces are replaced with underscores.
+func (defs *Definitions) ParseEnv() error {
+	if err := defs.normalizeEnv(); err != nil {
+		return err
+	}
+
+	for _, env := range os.Environ() {
+		key, val := parseEnviron(env)
+		errContext := func() string { return fmt.Sprintf("environment %s", key) }
+
+		def, ok := (*defs)[key]
+		if !ok {
+			continue // ignore unrecognized env
+		}
+
+		if def.AlsoBool {
+			boolVal, err := strconv.ParseBool(val)
+			if err == nil {
+				def.parseBoolValue(boolVal, errContext)
+			}
+		}
+
+		if err := def.parseValue(val, errContext); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func parseEnviron(s string) (key, val string) {
+	key, val, _ = strings.Cut(s, "=")
+	key = strings.ToUpper(key)
+
+	return
 }
