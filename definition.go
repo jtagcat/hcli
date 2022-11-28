@@ -63,9 +63,10 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 		}
 
 		new := transform(key, def)
+
+		// alias, not delete, as opaque normalization might lead to unexpected key change (for retrival after parse)
 		if key != new {
 			defs[new] = def
-			delete(defs, key)
 		}
 	}
 

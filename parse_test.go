@@ -3,6 +3,7 @@ package harg_test
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"testing"
 
@@ -62,11 +63,10 @@ func TestParseNilDefs(t *testing.T) {
 
 	defs := harg.Definitions{}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"hello", "-", "world",
-			"cHOKe", "return",
-		},
+	args, chokeReturn, err := defs.Parse([]string{
+		"hello", "-", "world",
+		"cHOKe", "return",
+	},
 		[]string{"choke"},
 	)
 
@@ -85,14 +85,13 @@ func TestParseDoubledash(t *testing.T) {
 
 	defs := harg.Definitions{}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"hello", "world",
-			"--",
-			"choke",
-			"--argument",
-			"-a",
-		},
+	args, chokeReturn, err := defs.Parse([]string{
+		"hello", "world",
+		"--",
+		"choke",
+		"--argument",
+		"-a",
+	},
 		[]string{"choke"},
 	)
 
@@ -111,13 +110,12 @@ func TestAliasParse(t *testing.T) {
 	}
 	assert.Nil(t, defs.Alias("twõか", oneKey))
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"hello",
-			"--one=one",
-			"--twõか", "two",
-			"world",
-		}, nil,
+	args, chokeReturn, err := defs.Parse([]string{
+		"hello",
+		"--one=one",
+		"--twõか", "two",
+		"world",
+	}, nil,
 	)
 
 	assert.Nil(t, err)
@@ -144,14 +142,13 @@ func TestParseLongOptEat(t *testing.T) {
 		fooKey: {},
 	}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"hello",
-			"--OかE=-t",
-			"--oかE", "-f",
-			"--oかe",
-			"world",
-		}, []string{"world"},
+	args, chokeReturn, err := defs.Parse([]string{
+		"hello",
+		"--OかE=-t",
+		"--oかE", "-f",
+		"--oかe",
+		"world",
+	}, []string{"world"},
 	)
 
 	assert.Nil(t, err)
@@ -177,16 +174,15 @@ func TestParseShortOptEat(t *testing.T) {
 		fooKey: {},
 	}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"hello",
-			"-かt",
-			"-か=-t",
-			"-か", "=-t",
-			"-か", "-f",
-			"-か",
-			"world",
-		}, []string{"world"},
+	args, chokeReturn, err := defs.Parse([]string{
+		"hello",
+		"-かt",
+		"-か=-t",
+		"-か", "=-t",
+		"-か", "-f",
+		"-か",
+		"world",
+	}, []string{"world"},
 	)
 
 	assert.Nil(t, err)
@@ -260,11 +256,10 @@ func TestParseCount(t *testing.T) {
 		oneKey:  {},
 	}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"-a-aaaa-a",
-			"--b", "-b-b-bbb",
-		}, nil,
+	args, chokeReturn, err := defs.Parse([]string{
+		"-a-aaaa-a",
+		"--b", "-b-b-bbb",
+	}, nil,
 	)
 
 	assert.Nil(t, err)
@@ -296,12 +291,11 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 		twoKey: {Type: harg.String, AlsoBool: true},
 	}
 
-	args, chokeReturn, err := defs.Parse(
-		[]string{
-			"---foo", "bar", // false
-			"--foo", "bar", // true
-			"--bar=true", // "true", not true
-		}, nil,
+	args, chokeReturn, err := defs.Parse([]string{
+		"---foo", "bar", // false
+		"--foo", "bar", // true
+		"--bar=true", // "true", not true
+	}, nil,
 	)
 
 	assert.Nil(t, err)
@@ -355,4 +349,37 @@ func TestParseError(t *testing.T) {
 type errTest struct {
 	in    []string
 	errIs error
+}
+
+func TestGetNormalizedKey(t *testing.T) {
+	one := "hElLO" // will be lowercased
+	defs := harg.Definitions{
+		one: {},
+	}
+
+	args, chokeReturn, err := defs.Parse([]string{
+		"--hello", "--HELlO", // any case should work
+	}, nil)
+	assert.Nil(t, err)
+	assert.Nil(t, chokeReturn)
+	assert.Nil(t, args)
+
+	c, ok := defs[one].Count()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, 2, c)
+}
+
+func TestGetNormalizedEnvKey(t *testing.T) {
+	one := "hElLO world" // will be uppercased and joined with underscore
+	defs := harg.Definitions{
+		one: {},
+	}
+
+	assert.Nil(t, os.Setenv("HELLO_wORlD", "true"))
+
+	assert.Nil(t, defs.ParseEnv())
+
+	b, ok := defs[one].Bool()
+	assert.Equal(t, true, ok)
+	assert.Equal(t, true, b)
 }
