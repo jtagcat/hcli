@@ -59,7 +59,7 @@ type (
 		// EnableBashCompletion bool
 
 		// List of flags to parse
-		Flags Flags
+		Flags []Flag
 
 		Before Func
 		Action Func

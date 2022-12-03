@@ -8,8 +8,7 @@ import (
 )
 
 type (
-	Flags map[string]flag
-	flag  interface {
+	Flag interface {
 		Type() harg.Type
 		options() []string
 	}
