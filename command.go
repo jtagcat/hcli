@@ -2,6 +2,7 @@ package hcli
 
 import (
 	"io"
+	"strings"
 )
 
 // TODO: keep track of aliases for help text
@@ -83,50 +84,50 @@ type (
 	}
 )
 
-// func (ctx *Context) String() (string, bool) {
-// 	// oh no
-// }
+//	func (ctx *Context) String() (string, bool) {
+//		// oh no
+//	}
+var (
+	keyVersion = "version"
+	keyHelp    = "help"
+)
 
 // For root command, name is usually os.Args[0]
 func (c Command) Run(name string, args []string) (exitCode int) {
-	versionUsed := c.Flags.flagNameUsed("version")
-	if !versionUsed {
-		c.Flags[nonConflictingKey(c.Flags, "version")] = BoolFlag{Options: []string{"version"}}
+	versionOK := !flagNameUsed(c.Flags, keyVersion)
+	if versionOK {
+		// this sounds like a horrible idea, not using the parser
+		if len(args) > 1 && strings.EqualFold(args[1], "--version") {
+			version()
+			return 0
+		}
+		c.Flags = append(c.Flags, BoolFlag{Options: []string{keyVersion}})
 	}
-	helpUsed := c.Flags.flagNameUsed("help")
-	if !helpUsed {
-		c.Flags[nonConflictingKey(c.Flags, "help")] = BoolFlag{Options: []string{"help"}}
+
+	// helpOK := !flagNameUsed(c.Flags, keyHelp)
+	// if helpOK {
+	// 	c.Flags = append(c.Flags, BoolFlag{Options: []string{keyHelp}})
+	// }
+
+	// global flags??
+
+	// duplicate parsing: env could be only parsed once;
+	// options chokereturn is kinda pointless, as all options are unordered anyway, instead command detection would be nice
+	// say from first parsed argument
+	// parse opts and env
+
+	// merge opts and env based on c.Flags
+
+	if chokeReturn[0] == nil {
+		return c.run(name, args)
 	}
 
-	// parse
-
-	// version
-
-	// subcommand switch
-
-	// subcommand help
-	// local?? help
-
-	// run()
+	return c.SubCommands[chokeReturn[0]].run(chokeReturn[0], chokeReturn[1:])
 
 	return 1
 }
 
-// bad function name
-func nonConflictingKey(m Flags, name string) string { // m map[string]any
-	original := name
-
-	for i := 2; true; i++ {
-		if _, ok := m[name]; !ok {
-			return name
-		}
-
-		name = original + "-" + string(i)
-	}
-
-	return "" // unreachable (go compiler requires it, though)
-}
-
 // this is called for any subcommands under Run()
 func (c Command) run(name string, args []string) (exitCode int) {
+	// handle (possible local) --help
 }

@@ -14,7 +14,7 @@ func TestRun(t *testing.T) {
 		Flags: []hcli.Flag{
 			hcli.StringFlag{
 				Options: []string{"foo", "f", "bar"}, Env: []string{"FOOBEANS"},
-				Source: hcli.OptEnv, Default: "brr", Condition: hcli.Defined,
+				Priority: hcli.OptEnv, Default: "brr", Condition: hcli.Defined,
 				Usage: "its for foo energy bars",
 			},
 			hcli.StringFlag{Env: []string{"MEOW"}, Condition: hcli.NotDefault},

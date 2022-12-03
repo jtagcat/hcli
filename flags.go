@@ -66,7 +66,7 @@ func NotDefault(defaultV any, def *harg.Definition) error {
 	return fmt.Errorf("must be non-default, default is %q", defaultV)
 }
 
-func (flags Flags) flagNameUsed(name string) bool {
+func flagNameUsed(flags []Flag, name string) bool {
 	for _, f := range flags {
 		for _, o := range f.options() {
 			if strings.EqualFold(o, name) {
@@ -84,7 +84,8 @@ func (flags Flags) flagNameUsed(name string) bool {
 //	EnvCSV bool
 
 //	AlsoBool bool // only for non-bools
-//	Source FlagSource
+//	Priority FlagSource
+//	Local  bool // if local, isn't available for subcommands
 
 //	Default *<flag type>
 //	Condition FlagCondition
@@ -101,8 +102,8 @@ type BoolFlag struct {
 	Env    []string
 	EnvCSV bool
 
-	Source FlagSource
-	Local  bool // if local, isn't available for subcommands
+	Priority FlagSource
+	Local    bool // if local, isn't available for subcommands
 
 	Default   bool
 	Condition FlagCondition
@@ -127,7 +128,7 @@ type StringFlag struct {
 	EnvCSV bool
 
 	AlsoBool bool
-	Source   FlagSource
+	Priority FlagSource
 	Local    bool // if local, isn't available for subcommands
 
 	Default   string
