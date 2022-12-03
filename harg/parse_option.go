@@ -29,14 +29,14 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 
 	if negateBool {
 		if !(def.Type == Bool || def.AlsoBool) {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '---'"),
 			})
 		}
 
 		if valueFound {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("negating prefix '---' can't have any value (---option=value)"),
 			})
@@ -94,7 +94,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		}
 
 		if negateNext {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '-'"),
 			})

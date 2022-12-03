@@ -24,8 +24,8 @@ const (
 var typeMax = Duration
 
 type typeMeta struct {
-	errName string
-	new     func() option
+	name string
+	new  func() option
 } //
 var typeMetaM = map[Type]typeMeta{
 	Bool:     {"bool", func() option { return &optBool{} }},

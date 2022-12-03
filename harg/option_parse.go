@@ -19,7 +19,7 @@ func (def *Definition) parseValue(value string, errContext func() string) error 
 	}
 
 	if err := def.parsed.add(value); err != nil {
-		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
+		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
 			Err:     ErrIncompatibleValue,
 			Wrapped: err,
 		})
@@ -41,7 +41,7 @@ func (def *Definition) parseBoolValue(val bool, errContext func() string) error 
 	}
 
 	if def.Type != Bool {
-		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].errName, internal.GenericErr{
+		return fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
 			Err:     ErrIncompatibleValue,
 			Wrapped: errors.New("AlsoBool must not have a Bool value after non-Bool value"),
 		})
