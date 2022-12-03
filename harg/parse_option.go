@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jtagcat/harg/internal"
+	"github.com/jtagcat/hcli/harg/internal"
 )
 
 // long option Bool (--foo) (---foo) or (--foo=value) (--foo) (--foo value)

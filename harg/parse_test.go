@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jtagcat/harg"
+	"github.com/jtagcat/hcli/harg"
 	"github.com/stretchr/testify/assert"
 )
 

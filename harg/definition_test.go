@@ -3,7 +3,7 @@ package harg_test
 import (
 	"testing"
 
-	"github.com/jtagcat/harg"
+	"github.com/jtagcat/hcli/harg"
 	"github.com/stretchr/testify/assert"
 )
 

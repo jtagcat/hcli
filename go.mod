@@ -1,4 +1,4 @@
-module github.com/jtagcat/harg
+module github.com/jtagcat/hcli
 
 go 1.19
 

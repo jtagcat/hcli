@@ -1,6 +1,6 @@
 # harg
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/jtagcat/harg.svg)](https://pkg.go.dev/github.com/jtagcat/harg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jtagcat/hcli/harg.svg)](https://pkg.go.dev/github.com/jtagcat/hcli/harg)
 
 GNU-compatible feature-complete local-scoped Go argument parsing. See [`FORMAT.md`](FORMAT.md) for full specification.
 

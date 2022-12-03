@@ -7,7 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	internal "github.com/jtagcat/harg/internal"
+	internal "github.com/jtagcat/hcli/harg/internal"
 )
 
 type (

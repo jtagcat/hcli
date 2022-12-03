@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jtagcat/harg"
+	"github.com/jtagcat/hcli/harg"
 )
 
 func TestOptBool(t *testing.T) {

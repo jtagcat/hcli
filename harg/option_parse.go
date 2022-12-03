@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	internal "github.com/jtagcat/harg/internal"
+	internal "github.com/jtagcat/hcli/harg/internal"
 )
 
 func (def *Definition) parseValue(value string, errContext func() string) error { // errContext provided
