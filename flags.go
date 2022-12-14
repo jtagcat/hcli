@@ -9,8 +9,7 @@ import (
 
 type (
 	Flag interface {
-		Type() harg.Type
-		options() []string
+		flag() flag
 	}
 
 	FlagCondition func(defaultValue any, def *harg.Definition) error
@@ -68,7 +67,7 @@ func NotDefault(defaultV any, def *harg.Definition) error {
 
 func flagNameUsed(flags []Flag, name string) bool {
 	for _, f := range flags {
-		for _, o := range f.options() {
+		for _, o := range f.flag().Options {
 			if strings.EqualFold(o, name) {
 				return true
 			}
@@ -77,20 +76,21 @@ func flagNameUsed(flags []Flag, name string) bool {
 	return false
 }
 
-// Flag structs contain:
-//	Options []string
+type flag struct {
+	Type    harg.Type
+	Default any
 
-//	Env    []string
-//	EnvCSV bool
+	Options []string
 
-//	AlsoBool bool // only for non-bools
-//	Priority FlagSource
-//	Local  bool // if local, isn't available for subcommands
+	Env    string
+	EnvCSV bool
 
-//	Default *<flag type>
-//	Condition FlagCondition
+	AlsoBool bool
 
-//	Usage string
+	Condition FlagCondition
+
+	Usage string
+}
 
 // Generatable:
 
@@ -99,11 +99,8 @@ func flagNameUsed(flags []Flag, name string) bool {
 type BoolFlag struct {
 	Options []string
 
-	Env    []string
+	Env    string
 	EnvCSV bool
-
-	Priority FlagSource
-	Local    bool // if local, isn't available for subcommands
 
 	Default   bool
 	Condition FlagCondition
@@ -111,12 +108,19 @@ type BoolFlag struct {
 	Usage string
 }
 
-func (_ BoolFlag) Type() harg.Type {
-	return harg.Bool
-}
+func (b BoolFlag) flag() flag {
+	return flag{
+		Type:    harg.Bool,
+		Default: b.Default,
 
-func (f BoolFlag) options() []string {
-	return f.Options
+		AlsoBool: false,
+
+		Options:   b.Options,
+		Env:       b.Env,
+		EnvCSV:    b.EnvCSV,
+		Condition: b.Condition,
+		Usage:     b.Usage,
+	}
 }
 
 // string
@@ -124,12 +128,10 @@ func (f BoolFlag) options() []string {
 type StringFlag struct {
 	Options []string
 
-	Env    []string
+	Env    string
 	EnvCSV bool
 
 	AlsoBool bool
-	Priority FlagSource
-	Local    bool // if local, isn't available for subcommands
 
 	Default   string
 	Condition FlagCondition
@@ -137,12 +139,18 @@ type StringFlag struct {
 	Usage string
 }
 
-func (_ StringFlag) Type() harg.Type {
-	return harg.String
-}
+func (b StringFlag) flag() flag {
+	return flag{
+		Type:    harg.String,
+		Default: b.Default,
 
-func (f StringFlag) options() []string {
-	return f.Options
+		Options:   b.Options,
+		Env:       b.Env,
+		EnvCSV:    b.EnvCSV,
+		AlsoBool:  b.AlsoBool,
+		Condition: b.Condition,
+		Usage:     b.Usage,
+	}
 }
 
 // TODO: ...

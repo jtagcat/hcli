@@ -131,7 +131,7 @@ func argumentKind(arg string) argumentKindT {
 	}
 }
 
-// Parses Definitions from the Environment.
+// Parses Definitions from the Environment. Do not use same definition for multiple environment variables.
 //
 // All definitions will be transformed to uppercase. Spaces are replaced with underscores.
 func (defs *Definitions) ParseEnv() error {

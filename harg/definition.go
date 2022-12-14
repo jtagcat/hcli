@@ -41,6 +41,17 @@ func (defs Definitions) Alias(name string, target string) error {
 	return nil
 }
 
+// TODO: hcli
+// Does not overwrite existing (case-sensitive) definition names.
+func (defs Definitions) SetUnique(name string, def *Definition) (ok bool) {
+	if _, ok := defs[name]; ok {
+		return false
+	}
+
+	defs[name] = def
+	return true
+}
+
 func (defs Definitions) get(key string) (*Definition, error) {
 	key = strings.ToLower(key)
 

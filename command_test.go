@@ -10,22 +10,25 @@ import (
 )
 
 func TestRun(t *testing.T) {
+	globalFlags := []hcli.Flag{
+		hcli.BoolFlag{Env: []string{"ACKNOWLEDGE_RISKS"}, Condition: func(_ any, def *harg.Definition) error {
+			b, _ := def.Bool()
+			if b {
+				return nil
+			}
+
+			return fmt.Errorf("program will not run unless ACKNOWLEDGE_RISKS is set to true") // --help will be called
+		}},
+	}
+
 	app := hcli.Command{
 		Flags: []hcli.Flag{
 			hcli.StringFlag{
 				Options: []string{"foo", "f", "bar"}, Env: []string{"FOOBEANS"},
-				Priority: hcli.OptEnv, Default: "brr", Condition: hcli.Defined,
+				Default: "brr", Condition: hcli.Defined,
 				Usage: "its for foo energy bars",
 			},
 			hcli.StringFlag{Env: []string{"MEOW"}, Condition: hcli.NotDefault},
-			hcli.BoolFlag{Env: []string{"ACKNOWLEDGE_RISKS"}, Condition: func(_ any, def *harg.Definition) error {
-				b, _ := def.Bool()
-				if b {
-					return nil
-				}
-
-				return fmt.Errorf("program will not run unless ACKNOWLEDGE_RISKS is set to true") // --help will be called
-			}},
 		},
 
 		Action: func(ctx hcli.Context) (_ error, exitCode int) {
