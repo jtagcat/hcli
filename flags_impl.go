@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/jtagcat/hcli/harg"
+	"golang.org/x/exp/slices"
 )
 
 // implements Condition //
 
 // Requires the user to set the flag. Setting to default is valid.
-func Defined[T comparable](_ T, def *harg.Definition) error {
+func Defined[T comparable](_ []T, def *harg.Definition) error {
 	if def.Default() {
 		return fmt.Errorf("must be set")
 	}
@@ -22,10 +23,11 @@ func getDefault[T any]() (defaultValue T) {
 }
 
 // Requires the user to set the flag. Setting to default is valid.
-func NotDefault[T comparable](defaultValue T, def *harg.Definition) error {
-	got, _ := def.Any()
+func NotDefault[T comparable](defaultValue []T, def *harg.Definition) error {
+	gotAny, _ := def.Any()
+	got, _ := gotAny.([]T) // caller ensures defaultValue and definition match
 
-	if got != defaultValue {
+	if slices.Equal(got, defaultValue) {
 		return fmt.Errorf("must be non-default, default: %v", defaultValue)
 	}
 

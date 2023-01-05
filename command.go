@@ -88,7 +88,7 @@ type (
 	}
 
 	Func func(ctx context.Context,
-		args []string, options harg.Definitions,
+		args []string, opts harg.Definitions,
 		log *slog.Logger,
 	) (exitCode int)
 	// ErrFunc func(ctx Context, err error) error
@@ -154,6 +154,7 @@ func (c *Command) run(ctx context.Context, name string, args []string, parentDef
 
 	// TODO: parse env (according to parent tree)
 	// TODO: validate all options (according to parent tree)
+	// TODO: validate that defs is not nil, default logger?
 
 	return c.Action(ctx, append(cleanArgs, choke...), defs, c.Logger)
 }
