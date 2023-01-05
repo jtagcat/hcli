@@ -1,4 +1,4 @@
-# harg
+# `harg`
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/jtagcat/hcli/harg.svg)](https://pkg.go.dev/github.com/jtagcat/hcli/harg)
 
