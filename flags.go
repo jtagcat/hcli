@@ -9,25 +9,24 @@ import (
 type (
 	Flag interface {
 		flag() flag
+		checkCondition(*harg.Definition) error
 	}
+
 	flag struct {
 		Level FlagLevel // Local/Global/Child/Parent
 
-		Type    harg.Type
-		Default any
+		Type harg.Type
 
-		Options []string
+		AlsoBool bool
+		Options  []string
 
 		Env    string
 		EnvCSV bool
 
-		AlsoBool bool
-
-		Condition FlagCondition
+		Default any // value to set when nothing is set
 
 		Usage string
 	}
-	FlagCondition func(defaultValue any, def *harg.Definition) error
 )
 
 type FlagLevel uint8 // enum:
@@ -39,6 +38,15 @@ const (
 ) //
 var flagLevelMax = Child
 
+func (f *flag) def() harg.Definition {
+	return harg.Definition{
+		Type:     f.Type,
+		AlsoBool: f.AlsoBool,
+		EnvCSV:   f.EnvCSV,
+	}
+}
+
+// TODO: remove?
 func flagNameUsed(flags []Flag, name string) bool {
 	for _, f := range flags {
 		for _, o := range f.flag().Options {
