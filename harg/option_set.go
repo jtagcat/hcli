@@ -21,7 +21,7 @@ const (
 	Float64
 	Duration
 ) //
-var typeMax = Duration
+var TypeMax = Duration
 
 type typeMeta struct {
 	name string

@@ -74,7 +74,7 @@ func TestDefinitionOverMax(t *testing.T) {
 
 	defs := Definitions{
 		"Bad": &Definition{
-			Type: Type(int(typeMax) + 1),
+			Type: Type(int(TypeMax) + 1),
 		},
 	}
 
@@ -87,8 +87,8 @@ func TestDefinitionOverMax(t *testing.T) {
 func TestTypeMetaMLen(t *testing.T) {
 	t.Parallel()
 
-	if len(typeMetaM) != int(typeMax)+1 {
-		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(typeMetaM), int(typeMax)+1)
+	if len(TypeMetaM) != int(TypeMax)+1 {
+		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(TypeMetaM), int(TypeMax)+1)
 	}
 }
 

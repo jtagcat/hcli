@@ -71,7 +71,7 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 			continue
 		}
 
-		if def.Type > typeMax {
+		if def.Type > TypeMax {
 			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
 				Err: ErrInvalidDefinition, Wrapped: errors.New("Type does not exist"),
 			})
