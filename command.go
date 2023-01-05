@@ -153,10 +153,13 @@ func (c *Command) run(ctx context.Context, name string, args []string, parentDef
 	}
 
 	// TODO: parse env (according to parent tree)
+
+	// cleanArgs, _, err := defs.Parse()
+
 	// TODO: validate all options (according to parent tree)
 	// TODO: validate that defs is not nil, default logger?
 
-	return c.Action(ctx, append(cleanArgs, choke...), defs, c.Logger)
+	return c.Action(ctx, cleanArgs, defs, c.Logger)
 }
 
 // TODO:
@@ -229,17 +232,11 @@ func mergeDefs(previousLevel, currentLevel harg.Definitions) harg.Definitions {
 // 	return commonDefs, parsed, nil
 // }
 
-// uh so option parsing shall be recursive double-defined implicit globals:
-// implicit globals: globals are defined once (in a subcommand tree) with flag property Global bool (name up to debate)
-// this makes globals available before subcommand
-// double-defined: it also makes the globals local
-// (local options are unavailable before subcommand)
-// recursive: subcommands may have subcommands, and globals are handled there as well
-//
-// conditions and defaults shall be applied after all parsing is done (replacing .Default() bool)
-// acting on global variables is the responsibility of all subcommands
+// TODO: continue working on run():
+// - defs logic
+// - traversing parent tree for globals
+// - maybe allow harg to take in an arbritrary value (pointer)
+// - if all else fails, build a reverse tree and start parsing from 0
 
-// edit: triple-defined: globals need to be opted-in for the root/same command
-
-// TODO: future ft. : for globals to be available in subcommands, opt-in with a string slice? (if it is implemented / does anything)
-// TODO: maybe provide a convenience error wrapping to include an exit code
+// TODO: maybe global options for:
+// - should unimplemented (yet specified by end user) be ignored or errored at

@@ -7,9 +7,9 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-// implements Condition //
-
-// Requires the user to set the flag. Setting to default is valid.
+// implements Condition
+//
+// Requires the user to set Flag. Setting to default is valid.
 func Defined[T comparable](_ []T, def *harg.Definition) error {
 	if def.Default() {
 		return fmt.Errorf("must be set")
@@ -22,8 +22,11 @@ func getDefault[T any]() (defaultValue T) {
 	return
 }
 
-// Requires the user to set the flag. Setting to default is valid.
-func NotDefault[T comparable](defaultValue []T, def *harg.Definition) error {
+// implements Condition
+//
+// Requires the user to set Flag to something other than the default.
+// NOTE: if default is []string{"hello"}, then non-default []string{"hello", "hello"} will return the "default" with .String() (not .SlString)
+func NotDefaultSl[T comparable](defaultValue []T, def *harg.Definition) error {
 	gotAny, _ := def.Any()
 	got, _ := gotAny.([]T) // caller ensures defaultValue and definition match
 
@@ -34,10 +37,21 @@ func NotDefault[T comparable](defaultValue []T, def *harg.Definition) error {
 	return nil
 }
 
-// implements flag //
+// implements Condition
+//
+// Requires the user to set the flag's first value to something other than the default.
+func NotDefault[T comparable](defaultValue []T, def *harg.Definition) error {
+	gotAny, _ := def.Any()
+	got, _ := gotAny.([]T) // caller ensures defaultValue and definition match
 
-// bool
+	if got[0] == defaultValue[0] {
+		return fmt.Errorf("must be non-default, default: %v", defaultValue[0])
+	}
 
+	return nil
+}
+
+// implements Flag for bool
 type (
 	BoolFlag struct {
 		Level FlagLevel // Local/Global/Child/Parent
@@ -74,10 +88,9 @@ func (f *BoolFlag) checkCondition(def *harg.Definition) error {
 	return f.Condition(f.Default, def)
 }
 
-// Generatable:
+// TODO: Generatable:
 
-// string
-
+// implements Flag for string
 type (
 	StringFlag struct {
 		Level FlagLevel // Local/Global/Child/Parent

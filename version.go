@@ -2,17 +2,16 @@ package hcli
 
 var (
 	semVer    string
-	gitCommit string
+	gitCommit string // TODO: don't export gitCommit, as it then only accessible at build time
 
 	VersionGiver string
 	// TODO: ...
 )
 
-// TODO: don't export gitCommit, as it then only accessible at build time
 // TODO: interface for printing version? allow calling it from elsewhere without exit?
 func version() {
 	// TODO:
-	// to json and print to stdout
+	// to json?
 }
 
 // https://blog.alexellis.io/inject-build-time-vars-golang/

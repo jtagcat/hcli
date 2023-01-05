@@ -1,8 +1,6 @@
 package hcli
 
 import (
-	"strings"
-
 	"github.com/jtagcat/hcli/harg"
 )
 
@@ -44,16 +42,4 @@ func (f *flag) def() harg.Definition {
 		AlsoBool: f.AlsoBool,
 		EnvCSV:   f.EnvCSV,
 	}
-}
-
-// TODO: remove?
-func flagNameUsed(flags []Flag, name string) bool {
-	for _, f := range flags {
-		for _, o := range f.flag().Options {
-			if strings.EqualFold(o, name) {
-				return true
-			}
-		}
-	}
-	return false
 }

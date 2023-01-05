@@ -14,17 +14,22 @@ import (
 func TestRun(t *testing.T) {
 	app := hcli.Command{
 		Flags: []hcli.Flag{
+			// define a global (within a sub-command tree)
 			&hcli.BoolFlag{
-				Level: hcli.Global, Env: "ACKNOWLEDGE_RISKS",
+				Level: hcli.Global, Options: []string{"acknowledge-risks"},
 				Condition: func(_ []bool, def *harg.Definition) error {
 					b, _ := def.Bool()
 					if b {
 						return nil
 					}
 
-					return fmt.Errorf("program will not run unless ACKNOWLEDGE_RISKS is set to true") // --help will be called
+					return fmt.Errorf("program will not run unless --acknowledge-risks is set (to true)") // --help will be called
 				},
 			},
+			// opt-in implementation / usage in children:
+			&hcli.BoolFlag{Level: hcli.Child, Env: "acknowledge-risks"}, // for Child, opt or env doesn't matter, everything works
+
+			// locals (default Level)
 			&hcli.StringFlag{
 				Options: []string{"foo", "f", "bar"}, Env: "FOOBEANS",
 				Default: []string{"brr"}, Condition: hcli.Defined[string],
