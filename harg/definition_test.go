@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/jtagcat/hcli/harg"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSetAlias(t *testing.T) {
@@ -15,19 +15,19 @@ func TestSetAlias(t *testing.T) {
 	}
 	defs := defsOriginal
 
-	assert.ErrorIs(t,
+	require.ErrorIs(t,
 		defs.Alias("alias", "invalid"),
 		harg.ErrOptionHasNoDefinition,
 	)
-	assert.Equal(t, defsOriginal, defs)
+	require.Equal(t, defsOriginal, defs)
 
 	//
 
 	defs = defsOriginal
 
-	assert.Nil(t,
+	require.Nil(t,
 		defs.Alias("alias", "foo"))
-	assert.Equal(t, harg.String, defs["alias"].Type)
+	require.Equal(t, harg.String, defs["alias"].Type)
 }
 
 func TestOptionGetAny(t *testing.T) {

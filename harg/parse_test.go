@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jtagcat/hcli/harg"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // see FORMAT.md for what test is
@@ -94,14 +94,14 @@ func TestParseNilDefs(t *testing.T) {
 		[]string{"choke"},
 	)
 
-	assert.Nil(t, err)
-	assert.Equal(t, []string{"hello", "-", "world"}, args)
-	assert.Equal(t, []string{"cHOKe", "return"}, chokeReturn)
+	require.Nil(t, err)
+	require.Equal(t, []string{"hello", "-", "world"}, args)
+	require.Equal(t, []string{"cHOKe", "return"}, chokeReturn)
 
 	args, chokeReturn, err = defs.Parse(nil, nil)
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Nil(t, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Nil(t, args)
 }
 
 func TestParseDoubledash(t *testing.T) {
@@ -119,9 +119,9 @@ func TestParseDoubledash(t *testing.T) {
 		[]string{"choke"},
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"hello", "world", "choke", "--argument", "-a"}, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Equal(t, []string{"hello", "world", "choke", "--argument", "-a"}, args)
 }
 
 func TestAliasParse(t *testing.T) {
@@ -132,7 +132,7 @@ func TestAliasParse(t *testing.T) {
 	defs := harg.Definitions{
 		kOne: {Type: harg.String},
 	}
-	assert.Nil(t, defs.Alias("twõか", kOne))
+	require.Nil(t, defs.Alias("twõか", kOne))
 
 	args, chokeReturn, err := defs.Parse([]string{
 		"hello",
@@ -142,17 +142,17 @@ func TestAliasParse(t *testing.T) {
 	}, nil,
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"hello", "world"}, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Equal(t, []string{"hello", "world"}, args)
 
 	sl, ok := defs[kOne].SlString()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"one", "two"}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []string{"one", "two"}, sl)
 
 	s, ok := defs[kOne].String()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, "two", s)
+	require.Equal(t, true, ok)
+	require.Equal(t, "two", s)
 }
 
 func TestParseLongOptEat(t *testing.T) {
@@ -175,16 +175,16 @@ func TestParseLongOptEat(t *testing.T) {
 	}, []string{"world"},
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"hello"}, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Equal(t, []string{"hello"}, args)
 
 	sl, ok := defs[kOne].SlString()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"-t", "", "world"}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []string{"-t", "", "world"}, sl)
 
-	assert.Equal(t, true, defs[kTwo].Default())
-	assert.Equal(t, false, defs[kFoo].Default())
+	require.Equal(t, true, defs[kTwo].Default())
+	require.Equal(t, false, defs[kFoo].Default())
 }
 
 func TestParseShortOptEat(t *testing.T) {
@@ -209,16 +209,16 @@ func TestParseShortOptEat(t *testing.T) {
 	}, []string{"world"},
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"hello"}, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Equal(t, []string{"hello"}, args)
 
 	sl, ok := defs[kOne].SlString()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []string{"t", "-t", "=-t", "", "world"}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []string{"t", "-t", "=-t", "", "world"}, sl)
 
-	assert.Equal(t, true, defs[kTwo].Default())
-	assert.Equal(t, false, defs[kFoo].Default())
+	require.Equal(t, true, defs[kTwo].Default())
+	require.Equal(t, false, defs[kFoo].Default())
 }
 
 func TestParseShortBoolOpt(t *testing.T) {
@@ -233,7 +233,7 @@ func TestParseShortBoolOpt(t *testing.T) {
 		kTwo:   {},
 		kUnset: {},
 	}
-	assert.Nil(t, defs.Alias("õx", kZero))
+	require.Nil(t, defs.Alias("õx", kZero))
 
 	for in, want := range map[string][]bool{
 		"-か":      {true, false, false},
@@ -250,22 +250,22 @@ func TestParseShortBoolOpt(t *testing.T) {
 			strings.Split(in, "\n"), nil,
 		)
 
-		assert.Nil(t, err)
-		assert.Nil(t, chokeReturn)
-		assert.Nil(t, args)
+		require.Nil(t, err)
+		require.Nil(t, chokeReturn)
+		require.Nil(t, args)
 
 		set := defs[kUnset].Default()
-		assert.Equal(t, true, set)
+		require.Equal(t, true, set)
 
 		b, ok := defs[kZero].Bool()
-		assert.Equal(t, true, ok)
-		assert.Equal(t, want[0], b)
+		require.Equal(t, true, ok)
+		require.Equal(t, want[0], b)
 
 		b, _ = defs[kOne].Bool()
-		assert.Equal(t, want[1], b)
+		require.Equal(t, want[1], b)
 
 		b, _ = defs[kTwo].Bool()
-		assert.Equal(t, want[2], b)
+		require.Equal(t, want[2], b)
 	}
 }
 
@@ -286,23 +286,23 @@ func TestParseCount(t *testing.T) {
 	}, nil,
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Nil(t, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Nil(t, args)
 
 	sl, ok := defs[kZero].SlBool()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []bool{true, false, true, true, true, false}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []bool{true, false, true, true, true, false}, sl)
 	c, ok := defs[kZero].Count()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, 0, c)
+	require.Equal(t, true, ok)
+	require.Equal(t, 0, c)
 
 	sl, ok = defs[kOne].SlBool()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []bool{false, true, false, false, true, true}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []bool{false, true, false, false, true, true}, sl)
 	c, ok = defs[kOne].Count()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, 2, c)
+	require.Equal(t, true, ok)
+	require.Equal(t, 2, c)
 }
 
 func TestParseLongOptAlsoBool(t *testing.T) {
@@ -322,17 +322,17 @@ func TestParseLongOptAlsoBool(t *testing.T) {
 	}, nil,
 	)
 
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Equal(t, []string{"bar", "bar"}, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Equal(t, []string{"bar", "bar"}, args)
 
 	sl, ok := defs[kOne].SlBool()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, []bool{false, true}, sl)
+	require.Equal(t, true, ok)
+	require.Equal(t, []bool{false, true}, sl)
 
 	s, ok := defs[kTwo].String()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, "true", s)
+	require.Equal(t, true, ok)
+	require.Equal(t, "true", s)
 }
 
 func TestParseError(t *testing.T) {
@@ -364,9 +364,9 @@ func TestParseError(t *testing.T) {
 			test.in, nil,
 		)
 
-		assert.ErrorIs(t, err, test.errIs)
-		assert.Nil(t, chokeReturn)
-		assert.Nil(t, args)
+		require.ErrorIs(t, err, test.errIs)
+		require.Nil(t, chokeReturn)
+		require.Nil(t, args)
 	}
 }
 
@@ -384,13 +384,13 @@ func TestGetNormalizedKey(t *testing.T) {
 	args, chokeReturn, err := defs.Parse([]string{
 		"--hello", "--HELlO", // any case should work
 	}, nil)
-	assert.Nil(t, err)
-	assert.Nil(t, chokeReturn)
-	assert.Nil(t, args)
+	require.Nil(t, err)
+	require.Nil(t, chokeReturn)
+	require.Nil(t, args)
 
 	c, ok := defs[kOne].Count()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, 2, c)
+	require.Equal(t, true, ok)
+	require.Equal(t, 2, c)
 }
 
 func TestGetNormalizedEnvKey(t *testing.T) {
@@ -399,13 +399,13 @@ func TestGetNormalizedEnvKey(t *testing.T) {
 		kOne: {},
 	}
 
-	assert.Nil(t, os.Setenv("HELLO_wORlD", "true"))
+	require.Nil(t, os.Setenv("HELLO_wORlD", "true"))
 
-	assert.Nil(t, defs.ParseEnv())
+	require.Nil(t, defs.ParseEnv())
 
 	b, ok := defs[kOne].Bool()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, true, b)
+	require.Equal(t, true, ok)
+	require.Equal(t, true, b)
 }
 
 func TestParseEnv(t *testing.T) {
@@ -415,16 +415,16 @@ func TestParseEnv(t *testing.T) {
 		kTwo: {EnvCSV: true},
 	}
 
-	assert.Nil(t, os.Setenv(kOne, "5s"))
-	assert.Nil(t, os.Setenv(kTwo, "true,true"))
+	require.Nil(t, os.Setenv(kOne, "5s"))
+	require.Nil(t, os.Setenv(kTwo, "true,true"))
 
-	assert.Nil(t, defs.ParseEnv())
+	require.Nil(t, defs.ParseEnv())
 
 	dur, ok := defs[kOne].Duration()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, time.Duration(5000000000), dur)
+	require.Equal(t, true, ok)
+	require.Equal(t, time.Duration(5000000000), dur)
 
 	c, ok := defs[kTwo].Count()
-	assert.Equal(t, true, ok)
-	assert.Equal(t, 2, c)
+	require.Equal(t, true, ok)
+	require.Equal(t, 2, c)
 }
