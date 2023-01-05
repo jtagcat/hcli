@@ -98,7 +98,7 @@ func (defs *Definitions) Parse(
 	return parsed, nil, nil
 }
 
-type argumentKindT uint32 // enum:
+type argumentKindT uint8 // enum:
 const (
 	argument        argumentKindT = iota
 	argumentDivider               // "--"

@@ -10,7 +10,7 @@ type option interface {
 	add(rawOpt string) error // string: type name (to use in error)
 }
 
-type Type uint32 // enum:
+type Type uint8 // enum:
 const (
 	Bool Type = iota
 	String
