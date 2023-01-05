@@ -1,12 +1,12 @@
 package hcli
 
 import (
+	"context"
 	"fmt"
-	"io"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/jtagcat/hcli/harg"
+	"golang.org/x/exp/slog"
 )
 
 // TODO: keep track of aliases for help text
@@ -66,145 +66,167 @@ type (
 		// List of flags to parse
 		Flags []Flag
 
-		Before Func
+		// TODO:
+		// Before Func
 		Action Func
-		After  Func // ErrFunc
+		// After  Func // ErrFunc
 
 		// List of commands to execute
 		SubCommands map[string]*Command
+		parent      parentCommand
 
 		// // Execute this function when an invalid flag is accessed from the context
 		// InvalidFlagAccessHandler InvalidFlagAccessFunc
 
+		// TODO:
 		// default to log.Println to stderr
-		Log io.Writer
+		Logger *slog.Logger
+	}
+	parentCommand struct {
+		name    string
+		command *Command
 	}
 
-	Func func(ctx Context) (_ error, exitCode int)
+	Func func(ctx context.Context,
+		args []string, options harg.Definitions,
+		log *slog.Logger,
+	) (exitCode int)
 	// ErrFunc func(ctx Context, err error) error
-
-	Context struct {
-		// ctx context.Context
-	}
 )
 
 //	func (ctx *Context) String() (string, bool) {
 //		// oh no
 //	}
-var (
+
+// TODO: version and help
+const (
 	keyVersion = "version"
 	keyHelp    = "help"
 )
 
-// For root command, name is usually os.Args[0]
-func (c Command) Run(name string, args []string) (exitCode int) {
-	versionOK := !flagNameUsed(c.Flags, keyVersion)
-	if versionOK { // TODO: move to global options
-		// this sounds like a horrible idea, not using the parser
-		if len(args) > 1 && strings.EqualFold(args[1], "--version") {
-			version()
-			return 0
-		}
-		c.Flags = append(c.Flags, BoolFlag{Options: []string{keyVersion}})
+var DisallowedKeys = []string{keyVersion, keyHelp}
+
+func (c *Command) ValidateTree() error {
+	// TODO: uniqueness of flags and env
+	// TODO: help and version is overwritten
+	return fmt.Errorf("not implemented")
+}
+
+// For root command, name is usually os.Args[0], args os.Args[1:].
+// See exit_codes.go for exitCode guidance.
+func (c *Command) Run(ctx context.Context, name string, args []string) (exitCode int) {
+	return c.run(ctx, name, args, nil)
+}
+
+func (c *Command) run(ctx context.Context, name string, args []string, parentDefs harg.Definitions) (exitCode int) {
+	var subNames []string
+	for name := range c.SubCommands {
+		subNames = append(subNames, name)
 	}
 
-	// helpOK := !flagNameUsed(c.Flags, keyHelp)
-	// if helpOK {
-	// 	c.Flags = append(c.Flags, BoolFlag{Options: []string{keyHelp}})
-	// }
-
-	// global flags??
-
-	// duplicate parsing: env could be only parsed once;
-	// options chokereturn is kinda pointless, as all options are unordered anyway, instead command detection would be nice
-	// say from first parsed argument
-	// parse opts and env
-
-	// merge opts and env based on c.Flags
-
-	// if !equalFoldsSlice(parsed[0], mapKeys(c.SubCommands)) {
-	// 	return c.run(name, args)
-	// }
-
-	// return c.SubCommands[chokeReturn[0]].run(chokeReturn[0], chokeReturn[1:])
-
-	return 1
-}
-
-// this is called for any subcommands under Run(), difference being --version
-func (c Command) run(name string, args []string) (exitCode int) {
-	// handle (possible local) --help
-}
-
-func (c Command) normalize() error {
-	// no duplicate env keys
-	// no duplicate option keys within a tree
-	// enforce uppercase for env and lowercase for long opts
-}
-
-func equalFoldsSlice(s string, target []string) bool {
-	for _, t := range target {
-		if strings.EqualFold(s, t) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// all env will be uppercased, 1-letter env is forbidden, long options will be lowercased
-// does not use Default nor Condition
-func (c Command) parseArgs(args []string) (_ harg.Definitions, parsed []string, _ error) {
-	optDefs, envDefs, commonDefs := make(harg.Definitions), make(harg.Definitions), make(harg.Definitions)
-
+	var allDefs harg.Definitions
 	for _, flag := range c.Flags {
-		f := flag.flag()
-		def := harg.Definition{Type: f.Type, AlsoBool: f.AlsoBool, EnvCSV: f.EnvCSV}
+		flag := flag.flag()
+		def := flag.def()
 
-		for _, opt := range f.Options {
-			// lowercase long options
-			if utf8.RuneCountInString(opt) > 1 {
-				opt = strings.ToLower(opt)
-			}
-
-			if ok := optDefs.SetUnique(opt, &def); !ok {
-				return nil, nil, fmt.Errorf("option name %s has duplicates (not unique): %w", opt, harg.ErrInvalidDefinition)
-			}
-			commonDefs[opt] = &def
-		}
-
-		opt := strings.ToUpper(f.Env)
-		if utf8.RuneCountInString(opt) < 2 {
-			// would conflict with short options
-			return nil, nil, fmt.Errorf("environment name %q must be at least 2 characters: %w", opt, harg.ErrInvalidDefinition)
-		}
-
-		envDefs[opt] = &def
-		if ok := commonDefs.SetUnique(opt, &def); !ok {
-			return nil, nil, fmt.Errorf("environment name %s has duplicates (not unique): %w", opt, harg.ErrInvalidDefinition)
+		for _, name := range flag.Options {
+			allDefs[name] = &def
 		}
 	}
 
-	if err := envDefs.ParseEnv(); err != nil {
-		return nil, nil, fmt.Errorf("parsing environment: %w", err)
-	}
-
-	parsed, _, err := optDefs.Parse(args, nil)
+	cleanArgs, choke, err := allDefs.Parse(args, subNames)
 	if err != nil {
-		return nil, nil, fmt.Errorf("parsing options: %w", err)
+		c.Logger.Error("parsing arguments", err, slog.String("parse_type", "initial"), slog.String("command_name", name))
+		return ExitUsage
 	}
 
-	return commonDefs, parsed, nil
-}
+	defs := mergeDefs(parentDefs, allDefs) // previous + current
 
-// TODO: *Command doesn't want to fit in to any
-func mapKeys[T comparable](m map[T]*Command) (keys []T) {
-	for key := range m {
-		keys = append(keys, key)
+	// switch to subcommand
+	if cleanArgs == nil && len(choke) != 0 {
+		subName := strings.ToLower(choke[0])
+		subCommand := c.SubCommands[subName]
+
+		subCommand.parent = parentCommand{name: name, command: c}
+
+		return subCommand.run(ctx, subName, choke[1:], defs)
 	}
 
-	return
+	// TODO: parse env (according to parent tree)
+	// TODO: validate all options (according to parent tree)
+
+	return c.Action(ctx, append(cleanArgs, choke...), defs, c.Logger)
 }
+
+// TODO:
+func mergeDefs(previousLevel, currentLevel harg.Definitions) harg.Definitions {
+	if len(previousLevel) == 0 {
+		return currentLevel
+	}
+
+	panic("merge not implemented") // TODO:
+}
+
+// func (c *Command) normalize() error {
+// 	// no duplicate env keys
+// 	// no duplicate option keys within a tree
+// 	// enforce uppercase for env and lowercase for long opts
+// }
+
+// func equalFoldsSlice(s string, target []string) bool {
+// 	for _, t := range target {
+// 		if strings.EqualFold(s, t) {
+// 			return true
+// 		}
+// 	}
+
+// 	return false
+// }
+
+// // all env will be uppercased, 1-letter env is forbidden, long options will be lowercased
+// // does not use Default nor Condition
+// func (c *Command) parseArgs(args []string) (_ harg.Definitions, parsed []string, _ error) {
+// 	optDefs, envDefs, commonDefs := make(harg.Definitions), make(harg.Definitions), make(harg.Definitions)
+
+// 	for _, flag := range c.Flags {
+// 		f := flag.flag()
+// 		def := harg.Definition{Type: f.Type, AlsoBool: f.AlsoBool, EnvCSV: f.EnvCSV}
+
+// 		for _, opt := range f.Names {
+// 			// lowercase long options
+// 			if utf8.RuneCountInString(opt) > 1 {
+// 				opt = strings.ToLower(opt)
+// 			}
+
+// 			if ok := optDefs.SetUnique(opt, &def); !ok {
+// 				return nil, nil, fmt.Errorf("option name %s has duplicates (not unique): %w", opt, harg.ErrInvalidDefinition)
+// 			}
+// 			commonDefs[opt] = &def
+// 		}
+
+// 		opt := strings.ToUpper(f.Env)
+// 		if utf8.RuneCountInString(opt) < 2 {
+// 			// would conflict with short options
+// 			return nil, nil, fmt.Errorf("environment name %q must be at least 2 characters: %w", opt, harg.ErrInvalidDefinition)
+// 		}
+
+// 		envDefs[opt] = &def
+// 		if ok := commonDefs.SetUnique(opt, &def); !ok {
+// 			return nil, nil, fmt.Errorf("environment name %s has duplicates (not unique): %w", opt, harg.ErrInvalidDefinition)
+// 		}
+// 	}
+
+// 	if err := envDefs.ParseEnv(); err != nil {
+// 		return nil, nil, fmt.Errorf("parsing environment: %w", err)
+// 	}
+
+// 	parsed, _, err := optDefs.Parse(args, nil)
+// 	if err != nil {
+// 		return nil, nil, fmt.Errorf("parsing options: %w", err)
+// 	}
+
+// 	return commonDefs, parsed, nil
+// }
 
 // uh so option parsing shall be recursive double-defined implicit globals:
 // implicit globals: globals are defined once (in a subcommand tree) with flag property Global bool (name up to debate)
@@ -216,4 +238,7 @@ func mapKeys[T comparable](m map[T]*Command) (keys []T) {
 // conditions and defaults shall be applied after all parsing is done (replacing .Default() bool)
 // acting on global variables is the responsibility of all subcommands
 
+// edit: triple-defined: globals need to be opted-in for the root/same command
+
+// TODO: future ft. : for globals to be available in subcommands, opt-in with a string slice? (if it is implemented / does anything)
 // TODO: maybe provide a convenience error wrapping to include an exit code

@@ -26,7 +26,7 @@ func NotDefault[T comparable](defaultValue T, def *harg.Definition) error {
 	got, _ := def.Any()
 
 	if got != defaultValue {
-		return fmt.Errorf("must be non-default, default is %q", defaultValue)
+		return fmt.Errorf("must be non-default, default: %v", defaultValue)
 	}
 
 	return nil
