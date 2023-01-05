@@ -6,10 +6,10 @@ import (
 	"github.com/jtagcat/hcli/harg"
 )
 
-// implements FlagCondition //
+// implements Condition //
 
 // Requires the user to set the flag. Setting to default is valid.
-func Defined(_ any, def *harg.Definition) error {
+func Defined(def *harg.Definition) error {
 	if def.Default() {
 		return fmt.Errorf("must be set")
 	}
@@ -17,10 +17,12 @@ func Defined(_ any, def *harg.Definition) error {
 	return nil
 }
 
-// Requires the user to set the flag. Setting to default is valid.
-func NotDefault(defaultV any, def *harg.Definition) error {
-	var set any
+func getDefault[T any]() (defaultValue T) {
+	return
+}
 
+// Requires the user to set the flag. Setting to default is valid.
+func NotDefault[T comparable](def *harg.Definition) error {
 	switch def.Type {
 	case harg.Bool:
 		set, _ = def.Bool()
@@ -40,28 +42,36 @@ func NotDefault(defaultV any, def *harg.Definition) error {
 		set, _ = def.Duration()
 	}
 
-	if set != defaultV {
-		return nil
+	if got == defaultV {
+		return fmt.Errorf("must be non-default, default is %q", defaultV)
 	}
 
-	return fmt.Errorf("must be non-default, default is %q", defaultV)
+	return nil
 }
 
 // implements flag //
 
 // bool
 
-type BoolFlag struct {
-	Options []string
+type (
+	BoolFlag struct {
+		Level FlagLevel // Local/Global/Child/Parent
 
-	Env    string
-	EnvCSV bool
+		Type     harg.Type
+		AlsoBool bool
 
-	Default   bool
-	Condition FlagCondition
+		Options []string
 
-	Usage string
-}
+		Env    string
+		EnvCSV bool
+
+		Default   bool // value to set when nothing is set
+		Condition boolCondition
+
+		Usage string
+	}
+	boolCondition func(got bool, def *harg.Definition) error
+)
 
 func (b BoolFlag) flag() flag {
 	return flag{
@@ -83,6 +93,8 @@ func (b BoolFlag) flag() flag {
 // string
 
 type StringFlag struct {
+	baseFlag
+
 	Options []string
 
 	Env    string

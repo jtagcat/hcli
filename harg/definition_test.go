@@ -29,3 +29,13 @@ func TestSetAlias(t *testing.T) {
 		defs.Alias("alias", "foo"))
 	assert.Equal(t, harg.String, defs["alias"].Type)
 }
+
+func TestOptionGetAny(t *testing.T) {
+	for t := harg.Type(0); t <= harg.TypeMax; t++ {
+		def := harg.Definition{Type: t}
+
+		// should not panic:
+		_, _ = def.Any()
+		_, _ = def.SlAny()
+	}
+}

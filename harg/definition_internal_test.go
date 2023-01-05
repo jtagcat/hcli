@@ -87,8 +87,8 @@ func TestDefinitionOverMax(t *testing.T) {
 func TestTypeMetaMLen(t *testing.T) {
 	t.Parallel()
 
-	if len(TypeMetaM) != int(TypeMax)+1 {
-		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(TypeMetaM), int(TypeMax)+1)
+	if len(typeMetaM) != int(TypeMax)+1 {
+		t.Fatalf("expected typeMetaM (%d) to be equal to Type(Max) (%d)", len(typeMetaM), int(TypeMax)+1)
 	}
 }
 

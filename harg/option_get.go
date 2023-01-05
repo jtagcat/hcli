@@ -16,6 +16,52 @@ func (def *Definition) Default() bool {
 	return def.parsed == nil
 }
 
+func (def *Definition) SlAny() (v any, ok bool) {
+	switch def.Type {
+	case Bool:
+		return def.SlBool()
+	case String:
+		return def.SlString()
+	case Int:
+		return def.SlInt()
+	case Int64:
+		return def.SlInt64()
+	case Uint:
+		return def.SlUint()
+	case Uint64:
+		return def.SlUint64()
+	case Float64:
+		return def.SlFloat64()
+	case Duration:
+		return def.SlDuration()
+	default:
+		panic("unreachable") // tested against
+	}
+}
+
+func (def *Definition) Any() (v any, ok bool) {
+	switch def.Type {
+	case Bool:
+		return def.Bool()
+	case String:
+		return def.String()
+	case Int:
+		return def.Int()
+	case Int64:
+		return def.Int64()
+	case Uint:
+		return def.Uint()
+	case Uint64:
+		return def.Uint64()
+	case Float64:
+		return def.Float64()
+	case Duration:
+		return def.Duration()
+	default:
+		panic("unreachable") // tested against
+	}
+}
+
 // For checking if AlsoBool's type was changed to Bool on parsing.
 func (def *Definition) IsBool() bool {
 	if def == nil {
