@@ -6,8 +6,6 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
-
-	internal "github.com/jtagcat/hcli/harg/internal"
 )
 
 type (
@@ -60,7 +58,7 @@ func (defs Definitions) get(key string) (*Definition, error) {
 		return def, nil
 	}
 
-	return nil, fmt.Errorf("%s: %w", internal.OptErrorName(key), ErrOptionHasNoDefinition)
+	return nil, fmt.Errorf("%s: %w", optErrorName(key), ErrOptionHasNoDefinition)
 }
 
 func (defs Definitions) genericNormalize(transform func(key string, def *Definition) (newKey string, _ error)) error {
@@ -72,13 +70,13 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 		}
 
 		if def.Type > TypeMax {
-			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
+			return fmt.Errorf("%s: %w", optErrorName(key), genericErr{
 				Err: ErrInvalidDefinition, Wrapped: errors.New("Type does not exist"),
 			})
 		}
 
 		if unicode.IsDigit(rune(key[0])) {
-			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
+			return fmt.Errorf("%s: %w", optErrorName(key), genericErr{
 				Err: ErrInvalidDefinition, Wrapped: errors.New("Definition key can't start with a digit"),
 			})
 		}
@@ -89,7 +87,7 @@ func (defs Definitions) genericNormalize(transform func(key string, def *Definit
 
 		new, err := transform(key, def)
 		if err != nil {
-			return fmt.Errorf("%s: %w", internal.OptErrorName(key), internal.GenericErr{
+			return fmt.Errorf("%s: %w", optErrorName(key), genericErr{
 				Err: ErrInvalidDefinition, Wrapped: err,
 			})
 		}
@@ -129,4 +127,15 @@ func (defs Definitions) normalizeEnv() error {
 		// capitalize all keys
 		return strings.ToUpper(key), nil
 	})
+}
+
+func optErrorName(key string) string {
+	var keyType string
+	if utf8.RuneCountInString(key) > 1 {
+		keyType = "long"
+	} else {
+		keyType = "short"
+	}
+
+	return fmt.Sprintf("%s option %q", keyType, key)
 }

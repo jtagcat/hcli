@@ -8,8 +8,6 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
-
-	internal "github.com/jtagcat/hcli/harg/internal"
 )
 
 var (
@@ -48,7 +46,7 @@ func (defs *Definitions) Parse(
 		return nil, nil, err
 	}
 
-	chokeM := internal.SliceLowercaseIndex(chokes)
+	chokeM := chokeIndex(chokes)
 
 	for {
 		var skipNext bool
@@ -175,4 +173,15 @@ func parseEnviron(s string) (key, val string) {
 	key = strings.ToUpper(key)
 
 	return
+}
+
+// converts slice to lowercase empty-valued map
+func chokeIndex(s []string) map[string]struct{} {
+	index := make(map[string]struct{})
+
+	for _, str := range s {
+		index[strings.ToLower(str)] = struct{}{}
+	}
+
+	return index
 }

@@ -4,15 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/jtagcat/hcli/harg/internal"
 )
 
 // long option Bool (--foo) (---foo) or (--foo=value) (--foo) (--foo value)
 //
 // caller should ensure len(args[i]) > 3; and defs.checkDefs()
 func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ error) {
-	argName := args[0][2:] // [2:]: remove prefix "--"
+	argName := strings.ToLower(args[0][2:]) // [2:]: remove prefix "--"
 	if argName == "" {
 		panic("parseLongOption caller did not ensure len(args[0]) > 2")
 	}
@@ -29,14 +27,14 @@ func (defs *Definitions) parseLongOption(args []string) (consumedNext bool, _ er
 
 	if negateBool {
 		if !(def.Type == Bool || def.AlsoBool) {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, genericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '---'"),
 			})
 		}
 
 		if valueFound {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, genericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("negating prefix '---' can't have any value (---option=value)"),
 			})
@@ -94,7 +92,7 @@ func (defs *Definitions) parseShortOption(args []string) (consumedNext bool, _ e
 		}
 
 		if negateNext {
-			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, internal.GenericErr{
+			return false, fmt.Errorf("parsing %s as %s: %w", errContext(), typeMetaM[def.Type].name, genericErr{
 				Err:     ErrIncompatibleValue,
 				Wrapped: errors.New("only Bool option definitions can use negating prefix '-'"),
 			})
