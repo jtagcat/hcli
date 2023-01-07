@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jtagcat/hcli/harg"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOptBool(t *testing.T) {
@@ -20,44 +21,32 @@ func TestOptBool(t *testing.T) {
 		"-k",
 		"-k",
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.True(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlBool()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Bool()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if !defs[key].IsBool() {
-		t.Fatal("value should be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 
 	c, ok := defs[key].Count()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if c != len(want) {
-		t.Fatal("count did not match wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), c)
 }
 
 func TestOptString(t *testing.T) {
@@ -72,36 +61,28 @@ func TestOptString(t *testing.T) {
 		"-k", want[0],
 		"-k", want[1],
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlString()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].String()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptInt(t *testing.T) {
@@ -116,36 +97,28 @@ func TestOptInt(t *testing.T) {
 		"-k", strconv.Itoa(want[0]),
 		"-k", strconv.Itoa(want[1]),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlInt()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Int()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptInt64(t *testing.T) {
@@ -160,36 +133,28 @@ func TestOptInt64(t *testing.T) {
 		"-k", strconv.Itoa(int(want[0])),
 		"-k", strconv.Itoa(int(want[1])),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlInt64()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Int64()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptUint(t *testing.T) {
@@ -204,36 +169,28 @@ func TestOptUint(t *testing.T) {
 		"-k", strconv.Itoa(int(want[0])),
 		"-k", strconv.Itoa(int(want[1])),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlUint()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Uint()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptUint64(t *testing.T) {
@@ -248,36 +205,28 @@ func TestOptUint64(t *testing.T) {
 		"-k", strconv.Itoa(int(want[0])),
 		"-k", strconv.Itoa(int(want[1])),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlUint64()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Uint64()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptFloat64(t *testing.T) {
@@ -292,36 +241,28 @@ func TestOptFloat64(t *testing.T) {
 		"-k", strconv.FormatFloat(want[0], 'f', -1, 64),
 		"-k", strconv.FormatFloat(want[1], 'f', -1, 64),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlFloat64()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Float64()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
 
 func TestOptDuration(t *testing.T) {
@@ -336,34 +277,26 @@ func TestOptDuration(t *testing.T) {
 		"-k", want[0].String(),
 		"-k", want[1].String(),
 	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(parsed) != 0 || len(chokeReturn) != 0 {
-		t.Fatal("parsed or chokeReturn is not empty")
-	}
+	require.Nil(t, err)
+	require.Zero(t, len(parsed))
+	require.Zero(t, len(chokeReturn))
 
-	if defs[key].Default() {
-		t.Fatal("value is default")
-	}
+	require.False(t, false, defs[key].Default())
+	require.False(t, defs[key].IsBool())
 
 	v, ok := defs[key].SlDuration()
-	if !ok {
-		t.Fatal("sl call not ok")
-	}
-	if len(v) != len(want) || v[0] != want[0] || v[1] != want[1] {
-		t.Fatal("did not get wanted")
-	}
+	require.True(t, ok)
+	require.Equal(t, len(want), len(v))
+	require.Equal(t, want[0], v[0])
+	require.Equal(t, want[1], v[1])
+	a, ok := defs[key].SlAny()
+	require.True(t, ok)
+	require.Equal(t, v, a)
 
 	sv, ok := defs[key].Duration()
-	if !ok {
-		t.Fatal("single value not ok")
-	}
-	if sv != want[1] {
-		t.Fatal("single value did not match wanted")
-	}
-
-	if defs[key].IsBool() {
-		t.Fatal("value should not be bool")
-	}
+	require.True(t, ok)
+	require.Equal(t, want[1], sv)
+	av, ok := defs[key].Any()
+	require.True(t, ok)
+	require.Equal(t, sv, av)
 }
