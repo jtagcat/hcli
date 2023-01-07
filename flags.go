@@ -24,6 +24,8 @@ type (
 		Default any // value to set when nothing is set
 
 		Usage string
+
+		child *ChildFlag
 	}
 )
 
@@ -32,9 +34,8 @@ const (
 	Local  FlagLevel = iota // only available in the defined command
 	Global                  // available in the command, and all subcommands implementing it (with Child)
 	Parent                  // available in all subcommands implementing it, not available in the same command
-	Child
 ) //
-var flagLevelMax = Child
+var flagLevelMax = Parent
 
 func (f *flag) def() harg.Definition {
 	return harg.Definition{

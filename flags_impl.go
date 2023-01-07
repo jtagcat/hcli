@@ -51,10 +51,27 @@ func NotDefault[T comparable](defaultValue []T, def *harg.Definition) error {
 	return nil
 }
 
-// implements Flag for bool
+// Flag implementation for Children referring to non-Local flags.
+type (
+	ChildFlag struct {
+		Parent string // link to Parent with any string from Parent's Options or Env
+	}
+)
+
+func (f *ChildFlag) flag() flag {
+	return flag{
+		child: f,
+	}
+}
+
+func (_ *ChildFlag) checkCondition(_ *harg.Definition) error {
+	return nil
+}
+
+// Flag implementation for bool.
 type (
 	BoolFlag struct {
-		Level FlagLevel // Local/Global/Child/Parent
+		Level FlagLevel // Local/GlobalC/Parent
 
 		Options []string
 
@@ -62,25 +79,25 @@ type (
 		EnvCSV bool
 
 		Default   []bool // value to set when nothing is set
-		Condition boolCondition
+		Condition BoolCondition
 
 		Usage string
 	}
-	boolCondition func(flagDefault []bool, def *harg.Definition) error
+	BoolCondition func(flagDefault []bool, def *harg.Definition) error
 )
 
-func (b *BoolFlag) flag() flag {
+func (f *BoolFlag) flag() flag {
 	return flag{
 		AlsoBool: false,
 
 		Type:    harg.Bool,
-		Default: b.Default,
+		Default: f.Default,
 
-		Level:   b.Level,
-		Options: b.Options,
-		Env:     b.Env,
-		EnvCSV:  b.EnvCSV,
-		Usage:   b.Usage,
+		Level:   f.Level,
+		Options: f.Options,
+		Env:     f.Env,
+		EnvCSV:  f.EnvCSV,
+		Usage:   f.Usage,
 	}
 }
 
@@ -90,10 +107,10 @@ func (f *BoolFlag) checkCondition(def *harg.Definition) error {
 
 // TODO: Generatable:
 
-// implements Flag for string
+// Flag implementation for string.
 type (
 	StringFlag struct {
-		Level FlagLevel // Local/Global/Child/Parent
+		Level FlagLevel // Local/Global/Parent
 
 		AlsoBool bool
 		Options  []string
@@ -102,24 +119,24 @@ type (
 		EnvCSV bool
 
 		Default   []string // value to set when nothing is set
-		Condition stringCondition
+		Condition StringCondition
 
 		Usage string
 	}
-	stringCondition func(flagDefault []string, def *harg.Definition) error
+	StringCondition func(flagDefault []string, def *harg.Definition) error
 )
 
-func (b *StringFlag) flag() flag {
+func (f *StringFlag) flag() flag {
 	return flag{
 		Type:    harg.String,
-		Default: b.Default,
+		Default: f.Default,
 
-		Level:    b.Level,
-		Options:  b.Options,
-		Env:      b.Env,
-		EnvCSV:   b.EnvCSV,
-		AlsoBool: b.AlsoBool,
-		Usage:    b.Usage,
+		Level:    f.Level,
+		Options:  f.Options,
+		Env:      f.Env,
+		EnvCSV:   f.EnvCSV,
+		AlsoBool: f.AlsoBool,
+		Usage:    f.Usage,
 	}
 }
 

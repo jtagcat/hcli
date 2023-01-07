@@ -27,7 +27,7 @@ func TestRun(t *testing.T) {
 				},
 			},
 			// opt-in implementation / usage in children:
-			&hcli.BoolFlag{Level: hcli.Child, Env: "acknowledge-risks"}, // for Child, opt or env doesn't matter, everything works
+			&hcli.ChildFlag{Parent: "acknowledge-risks"}, // for Child: opt or env doesn't matter, everything works
 
 			// locals (default Level)
 			&hcli.StringFlag{
