@@ -38,6 +38,10 @@ var typeMetaM = map[Type]typeMeta{
 	Duration: {"duration", func() option { return &optDuration{} }},
 }
 
+func (t Type) String() string {
+	return typeMetaM[t].name
+}
+
 // bool / count
 
 type (

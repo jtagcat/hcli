@@ -4,10 +4,6 @@ import (
 	"time"
 )
 
-func (def *Definition) TypeName() string {
-	return typeMetaM[def.Type].name
-}
-
 // Whether definition's value is a default value (was it set via Parse())
 func (def *Definition) Default() bool {
 	if def == nil {
