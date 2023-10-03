@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jtagcat/hcli/harg"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // implements Condition

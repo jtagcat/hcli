@@ -8,7 +8,7 @@ import (
 
 	"github.com/jtagcat/hcli"
 	"github.com/jtagcat/hcli/harg"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 func TestRun(t *testing.T) {

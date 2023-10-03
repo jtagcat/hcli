@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/jtagcat/hcli/harg"
-	"golang.org/x/exp/slog"
+	"log/slog"
 )
 
 // TODO: keep track of aliases for help text
