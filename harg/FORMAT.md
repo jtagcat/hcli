@@ -52,3 +52,5 @@ Based on https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 - Negating short options: adding `-` before a short option means `false` (`--f`, `-b-f`).
 - Negating long options: adding `-` before a long option means `false` (`---foo`).
 - Chokes parse until a keyword is found. This allows crafting subcommands, and global-local options.
+
+I have since learned, that some applications use plusses (`+f`) for negative short options, but I still do side with my prior decision.
